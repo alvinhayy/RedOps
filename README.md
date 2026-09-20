@@ -1,10 +1,32 @@
-# RedOps RAG
+<h1 align="center">
+  <img src="assets/banner.svg" alt="RedOps RAG" width="900"><br>
+</h1>
 
-Framework RAG lokal untuk mencari dan menjawab berdasarkan knowledge pentest yang dapat
-ditelusuri kembali ke sumbernya. Gunakan hanya pada sistem yang Anda miliki atau memiliki
-izin eksplisit untuk diuji.
+<h4 align="center">Source-grounded pentest knowledge, agent workflows, and safe tool execution in one local-first framework.</h4>
 
-## Fitur
+<p align="center">
+  <img src="https://img.shields.io/badge/platform-Python%203.11%2B-blue">
+  <img src="https://img.shields.io/badge/index-SQLite%20FTS5-6f42c1">
+  <img src="https://img.shields.io/badge/providers-Z.ai%20%7C%20DeepSeek%20%7C%20OrcaRouter-orange">
+  <img src="https://img.shields.io/badge/execution-Exegol-green">
+  <img src="https://img.shields.io/badge/license-MIT-blue">
+</p>
+
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#agent-cli-integrations">CLI Integrations</a> •
+  <a href="#safety-boundary">Safety</a>
+</p>
+
+---
+
+RedOps adalah framework RAG lokal untuk knowledge pentest yang dapat ditelusuri kembali
+ke sumbernya. Gunakan hanya pada sistem yang Anda miliki atau memiliki izin eksplisit
+untuk diuji.
+
+## Features
 
 - ingestion Markdown yang idempotent dan heading-aware;
 - hybrid retrieval: SQLite FTS5 + cosine vector dengan reciprocal-rank fusion;
@@ -14,9 +36,12 @@ izin eksplisit untuk diuji.
 - CLI dan REST API FastAPI;
 - backend eksekusi tool lokal atau Exegol dengan argv aman tanpa shell;
 - profil agent mobile untuk workflow Android/iOS berbasis Mobile-ReverseSkill;
-- provenance berupa judul, heading, path lokal, dan URL asli.
+- provenance berupa judul, heading, path lokal, dan URL asli;
+- provider registry untuk local extractive, OpenAI, Z.ai, DeepSeek, dan OrcaRouter;
+- installer adapter untuk Codex, Claude CLI, dan OpenCode;
+- bounded WAF timing benchmark dengan guardrail anti-DoS.
 
-## Instalasi
+## Installation
 
 RedOps dapat dipasang sebagai CLI mandiri dengan Python 3.11+:
 
@@ -33,7 +58,7 @@ redops --help
 redops providers
 ```
 
-## Mulai cepat
+## Quick Start
 
 Persyaratan: Python 3.11+ dan SQLite yang mendukung FTS5.
 
@@ -51,7 +76,7 @@ Variabel `.env` tidak otomatis dimuat oleh aplikasi. Ekspor variabel yang diperl
 atau jalankan dengan alat seperti `dotenv`/Docker Compose. Default aman dan lokal bisa
 langsung dipakai tanpa `.env`.
 
-## Integrasi Codex, Claude CLI, dan OpenCode
+## Agent CLI Integrations
 
 Installer membuat skill/command kecil yang memanggil CLI RedOps, tanpa menyalin secret
 atau mengubah konfigurasi provider. Jalankan dry-run lebih dahulu:
@@ -81,7 +106,7 @@ curl -s http://localhost:8000/v1/query \
 
 Dokumentasi interaktif tersedia di `http://localhost:8000/docs`.
 
-## Eksekusi tool melalui Exegol
+## Exegol Tool Execution
 
 Exegol harus sudah terpasang dan container telah disiapkan sesuai dokumentasi resmi
 di [docs.exegol.com](https://docs.exegol.com/). Gunakan hanya terhadap target dengan
@@ -138,7 +163,7 @@ list argv, tanpa shell). Contoh konfigurasi klien:
 {"mcpServers":{"redops-exegol":{"command":"redops","args":["exegol-mcp"]}}}
 ```
 
-## Provider model dan CLI
+## Model Providers
 
 RedOps mendukung provider yang tersedia di konfigurasi OpenCode: local extractive, OpenAI,
 Z.ai/GLM, DeepSeek, dan OrcaRouter. Lihat [docs/providers.md](docs/providers.md) untuk
@@ -150,7 +175,7 @@ redops providers
 redops providers --json
 ```
 
-## WAF timing benchmark (bounded)
+## WAF Timing Benchmark (Bounded)
 
 RedOps menyediakan benchmark timing untuk target yang telah diotorisasi. Amplifikasi
 hanya memakai URL response yang dipilih eksplisit, maksimum 30 sampel, delay minimum
@@ -186,7 +211,7 @@ redops query "Apa indikator delegation yang berisiko?"
 Jangan commit API key. Perubahan provider/model/dimensi embedding memerlukan
 `redops ingest --force` agar query dan index tetap konsisten.
 
-## Format knowledge
+## Knowledge Format
 
 Semua `knowledge/**/*.md` akan diindeks. Front matter berikut direkomendasikan agar
 sitasi mengarah ke sumber asli:
@@ -205,16 +230,24 @@ fetched_at: 2026-09-20T00:00:00Z
 Corpus dan alat refresh di dalam `knowledge/` dikelola terpisah dari framework. Setelah
 refresh, jalankan `redops ingest`; hanya dokumen berubah yang dihitung ulang.
 
-## Pengujian
+## Testing
 
 ```bash
 pytest
 ruff check .
 ```
 
-## Batasan desain
+## Design Notes
 
 Backend SQLite melakukan pemindaian vector in-process. Ini sederhana dan ideal untuk
 corpus dokumentasi kecil/menengah. Untuk jutaan chunk, implementasikan backend `IndexStore`
 dengan vector database tanpa mengubah antarmuka service/API. Fallback extractive bukan LLM:
 ia mengembalikan cuplikan sumber, sehingga selalu eksplisit dan dapat diverifikasi.
+
+## Safety Boundary
+
+- Scope, authorization, and test accounts must be confirmed before active traffic.
+- Exegol is the preferred execution backend; commands are passed as argv without a shell.
+- Mobile and WAF workflows are limited to disposable local/staging environments where noted.
+- Do not commit API keys, MCP tokens, credentials, session cookies, or engagement data.
+- Review the relevant agent profile in [`agents/`](agents/) before delegating work.
