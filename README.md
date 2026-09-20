@@ -86,18 +86,30 @@ Deployment RedOps yang didukung README ini menggunakan satu MCP inti:
 
 ### CLI tools per agent
 
-| Agent | Required tools | Optional tools |
+Daftar berikut dihasilkan otomatis dari registry agent dan skill matrix, sehingga required/
+optional tools milik skill selalu ikut ke agent pemiliknya:
+
+<!-- BEGIN GENERATED AGENT TOOLS -->
+| Agent | Required tools (registry + owned skills) | Optional tools (registry + owned skills) |
 |---|---|---|
-| AD | `nmap`, `ldapsearch`, NetExec, Impacket, BloodHound | Kerbrute, Certipy, BloodyAD |
-| Windows Red Team | PowerView, Seatbelt, winPEAS, LOLBAS | Mimikatz |
-| Web | `nmap`, httpx, Burp, XSRFProbe | Nuclei, ffuf, browser tooling |
-| Cloud | `aws`, `az`, `gcloud` | ScoutSuite, Prowler, Pacu |
-| Mobile | ADB, JADX, apktool, Frida, Objection | ios-deploy, class-dump, Ghidra, radare2 |
-| Reversing | Ghidra, radare2, `strings`, `objdump` | rizin, capa, YARA, FLOSS |
-| Network | `nmap`, NetExec, tshark | masscan, Wireshark, Responder |
-| Container/DevOps | Docker, Trivy, kubectl | Helm, kube-bench, Syft, Grype |
-| Web3 | Slither, Mythril, Foundry `cast` | Echidna, Semgrep |
-| RAG Curator | RedOps CLI, Python, Markdown tools | ripgrep, jq, Pandoc |
+| `ad_agent` | `bloodhound`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
+| `windows_redteam_agent` | `lolbas`, `powerview`, `seatbelt`, `winpeas` | `mimikatz` |
+| `web_agent` | `burp`, `httpx`, `nmap` | `camoufox`, `ffuf`, `nuclei`, `xsrfprobe` |
+| `cloud_agent` | `aws`, `az`, `gcloud` | `pacu`, `prowler`, `scoutsuite` |
+| `mobile_agent` | `adb`, `apktool`, `file`, `find`, `frida`, `jadx`, `objection`, `rg`, `strings`, `unzip` | `afl-fuzz`, `androguard`, `baksmali`, `clang`, `class-dump`, `codesign`, `dex2jar`, `docker`, `drozer`, `ghidra`, `gitleaks`, `ios-deploy`, `llvm-objdump`, `make`, `ndk-build`, `nm`, `node`, `npx`, `otool`, `plutil`, `radare2`, `semgrep`, `timeout`, `trufflehog`, `uiautomator2` |
+| `reversing_tools_agent` | `file`, `find`, `ghidra`, `objdump`, `radare2`, `strings`, `unzip` | `androguard`, `apktool`, `baksmali`, `capa`, `class-dump`, `codesign`, `dex2jar`, `docker`, `floss`, `gitleaks`, `jadx`, `node`, `npx`, `otool`, `plutil`, `rizin`, `trufflehog`, `yara` |
+| `network_agent` | `netexec`, `nmap`, `tshark` | `masscan`, `responder`, `wireshark` |
+| `container_devops_agent` | `docker`, `kubectl`, `trivy` | `grype`, `helm`, `kube-bench`, `syft` |
+| `web3_agent` | `cast`, `mythril`, `slither` | `burp`, `echidna`, `foundry`, `semgrep` |
+| `rag_curator_agent` | `markdown-tools`, `python`, `redops` | `jq`, `pandoc`, `ripgrep` |
+<!-- END GENERATED AGENT TOOLS -->
+
+Regenerasi setelah mengubah registry atau skill:
+
+```bash
+python scripts/sync_agent_tools.py
+python scripts/sync_agent_tools.py --check
+```
 
 Tool names are capability requirements; health-check them inside Exegol before use.
 Install only what the approved engagement needs and keep credentials outside the corpus.

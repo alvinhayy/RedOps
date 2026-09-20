@@ -16,6 +16,23 @@ means the workflow may continue with a documented limitation.
 | MCP | Burp, Camoufox, BloodHound, uiautomator2, Ghidra, or radare2 connector; verify health/capabilities |
 | Local | RedOps/RAG helpers and explicitly approved workspace files through bounded argv |
 
+### Generated CLI tool union
+
+<!-- BEGIN GENERATED AGENT TOOL MATRIX -->
+| Agent | Required tools (registry + owned skills) | Optional tools (registry + owned skills) |
+|---|---|---|
+| `ad_agent` | `bloodhound`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
+| `windows_redteam_agent` | `lolbas`, `powerview`, `seatbelt`, `winpeas` | `mimikatz` |
+| `web_agent` | `burp`, `httpx`, `nmap` | `camoufox`, `ffuf`, `nuclei`, `xsrfprobe` |
+| `cloud_agent` | `aws`, `az`, `gcloud` | `pacu`, `prowler`, `scoutsuite` |
+| `mobile_agent` | `adb`, `apktool`, `file`, `find`, `frida`, `jadx`, `objection`, `rg`, `strings`, `unzip` | `afl-fuzz`, `androguard`, `baksmali`, `clang`, `class-dump`, `codesign`, `dex2jar`, `docker`, `drozer`, `ghidra`, `gitleaks`, `ios-deploy`, `llvm-objdump`, `make`, `ndk-build`, `nm`, `node`, `npx`, `otool`, `plutil`, `radare2`, `semgrep`, `timeout`, `trufflehog`, `uiautomator2` |
+| `reversing_tools_agent` | `file`, `find`, `ghidra`, `objdump`, `radare2`, `strings`, `unzip` | `androguard`, `apktool`, `baksmali`, `capa`, `class-dump`, `codesign`, `dex2jar`, `docker`, `floss`, `gitleaks`, `jadx`, `node`, `npx`, `otool`, `plutil`, `rizin`, `trufflehog`, `yara` |
+| `network_agent` | `netexec`, `nmap`, `tshark` | `masscan`, `responder`, `wireshark` |
+| `container_devops_agent` | `docker`, `kubectl`, `trivy` | `grype`, `helm`, `kube-bench`, `syft` |
+| `web3_agent` | `cast`, `mythril`, `slither` | `burp`, `echidna`, `foundry`, `semgrep` |
+| `rag_curator_agent` | `markdown-tools`, `python`, `redops` | `jq`, `pandoc`, `ripgrep` |
+<!-- END GENERATED AGENT TOOL MATRIX -->
+
 ## Profiles
 
 ### `ad_agent`

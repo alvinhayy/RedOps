@@ -1,0 +1,145 @@
+version: 1
+description: Generated union of registry and skill tooling
+agents:
+  ad_agent:
+    required:
+    - bloodhound
+    - impacket
+    - ldapsearch
+    - netexec
+    - nmap
+    optional:
+    - bloodyad
+    - certipy
+    - kerbrute
+  windows_redteam_agent:
+    required:
+    - lolbas
+    - powerview
+    - seatbelt
+    - winpeas
+    optional:
+    - mimikatz
+  web_agent:
+    required:
+    - burp
+    - httpx
+    - nmap
+    optional:
+    - camoufox
+    - ffuf
+    - nuclei
+    - xsrfprobe
+  cloud_agent:
+    required:
+    - aws
+    - az
+    - gcloud
+    optional:
+    - pacu
+    - prowler
+    - scoutsuite
+  mobile_agent:
+    required:
+    - adb
+    - apktool
+    - file
+    - find
+    - frida
+    - jadx
+    - objection
+    - rg
+    - strings
+    - unzip
+    optional:
+    - afl-fuzz
+    - androguard
+    - baksmali
+    - clang
+    - class-dump
+    - codesign
+    - dex2jar
+    - docker
+    - drozer
+    - ghidra
+    - gitleaks
+    - ios-deploy
+    - llvm-objdump
+    - make
+    - ndk-build
+    - nm
+    - node
+    - npx
+    - otool
+    - plutil
+    - radare2
+    - semgrep
+    - timeout
+    - trufflehog
+    - uiautomator2
+  reversing_tools_agent:
+    required:
+    - file
+    - find
+    - ghidra
+    - objdump
+    - radare2
+    - strings
+    - unzip
+    optional:
+    - androguard
+    - apktool
+    - baksmali
+    - capa
+    - class-dump
+    - codesign
+    - dex2jar
+    - docker
+    - floss
+    - gitleaks
+    - jadx
+    - node
+    - npx
+    - otool
+    - plutil
+    - rizin
+    - trufflehog
+    - yara
+  network_agent:
+    required:
+    - netexec
+    - nmap
+    - tshark
+    optional:
+    - masscan
+    - responder
+    - wireshark
+  container_devops_agent:
+    required:
+    - docker
+    - kubectl
+    - trivy
+    optional:
+    - grype
+    - helm
+    - kube-bench
+    - syft
+  web3_agent:
+    required:
+    - cast
+    - mythril
+    - slither
+    optional:
+    - burp
+    - echidna
+    - foundry
+    - semgrep
+  rag_curator_agent:
+    required:
+    - markdown-tools
+    - python
+    - redops
+    optional:
+    - jq
+    - pandoc
+    - ripgrep
