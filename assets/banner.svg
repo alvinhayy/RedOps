@@ -3,11 +3,11 @@
   <desc id="desc">Source-grounded pentest knowledge and agent tooling</desc>
   <rect width="1200" height="340" fill="#f4f3ef"/>
   <g fill="#111111" font-family="Arial Black, Impact, sans-serif" font-weight="900">
-    <text x="46" y="94" font-size="76" letter-spacing="-2">REDOPS</text>
+    <text x="46" y="94" font-size="76" letter-spacing="-2">RedOps</text>
     <text x="46" y="163" font-size="68" letter-spacing="-2">PENTEST RAG</text>
   </g>
   <rect x="46" y="178" width="515" height="3" fill="#d91f26"/>
-  <text x="46" y="213" fill="#111111" font-family="Arial, sans-serif" font-size="23" font-weight="700" letter-spacing="1.5">REDOPS / RED TEAM OPERATORS</text>
+  <text x="46" y="213" fill="#111111" font-family="Arial, sans-serif" font-size="23" font-weight="700" letter-spacing="1.5">RedOps / Red Team Operators</text>
   <text x="46" y="246" fill="#666666" font-family="Arial, sans-serif" font-size="20">Source-grounded knowledge for authorized security testing</text>
   <g fill="#111111" font-family="monospace" font-size="16">
     <text x="46" y="278">$ redops query "map the attack surface"</text>
