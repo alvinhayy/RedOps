@@ -16,6 +16,23 @@ izin eksplisit untuk diuji.
 - profil agent mobile untuk workflow Android/iOS berbasis Mobile-ReverseSkill;
 - provenance berupa judul, heading, path lokal, dan URL asli.
 
+## Instalasi
+
+RedOps dapat dipasang sebagai CLI mandiri dengan Python 3.11+:
+
+```bash
+pipx install git+https://github.com/alvinhayy/RedOps.git
+# atau dari checkout lokal:
+pip install -e '.[dev]'
+```
+
+Periksa instalasi dan daftar provider:
+
+```bash
+redops --help
+redops providers
+```
+
 ## Mulai cepat
 
 Persyaratan: Python 3.11+ dan SQLite yang mendukung FTS5.
@@ -33,6 +50,24 @@ redops query "Bagaimana melakukan enumerasi Active Directory?"
 Variabel `.env` tidak otomatis dimuat oleh aplikasi. Ekspor variabel yang diperlukan,
 atau jalankan dengan alat seperti `dotenv`/Docker Compose. Default aman dan lokal bisa
 langsung dipakai tanpa `.env`.
+
+## Integrasi Codex, Claude CLI, dan OpenCode
+
+Installer membuat skill/command kecil yang memanggil CLI RedOps, tanpa menyalin secret
+atau mengubah konfigurasi provider. Jalankan dry-run lebih dahulu:
+
+```bash
+redops install-cli all --dry-run
+redops install-cli codex
+redops install-cli claude
+redops install-cli opencode
+```
+
+Target default adalah `~/.codex`, `~/.claude`, dan `~/.config/opencode`. Override path
+dengan `CODEX_HOME`, `CLAUDE_HOME`, atau `OPENCODE_HOME`; gunakan `--force` hanya jika
+ingin mengganti adapter RedOps yang sudah ada. Detail command dan provider tersedia di
+[`docs/providers.md`](docs/providers.md). Setelah instalasi, restart CLI terkait agar
+skill/command baru dimuat.
 
 Untuk menjalankan API:
 

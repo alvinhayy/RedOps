@@ -4,6 +4,16 @@ RedOps supports the providers configured in OpenCode through one stable interfac
 providers use the OpenAI-compatible `/chat/completions` contract; the local `extractive`
 provider requires no network or credentials.
 
+Install the CLI adapters for Codex, Claude CLI, and OpenCode with:
+
+```bash
+redops install-cli all --dry-run
+redops install-cli all
+```
+
+The installer writes only RedOps command/skill text. It does not write API keys, MCP
+tokens, or provider configuration.
+
 List the registry without exposing credentials:
 
 ```bash

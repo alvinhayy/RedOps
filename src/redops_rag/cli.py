@@ -15,6 +15,11 @@ def build_parser() -> argparse.ArgumentParser:
     providers_parser = subparsers.add_parser("providers", help="list supported model providers")
     providers_parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
 
+    install_parser = subparsers.add_parser("install-cli", help="install RedOps adapters for agent CLIs")
+    install_parser.add_argument("target", choices=("codex", "claude", "opencode", "all"))
+    install_parser.add_argument("--dry-run", action="store_true", help="show paths without writing")
+    install_parser.add_argument("--force", action="store_true", help="replace existing RedOps adapter files")
+
     ingest_parser = subparsers.add_parser("ingest", help="index Markdown knowledge")
     ingest_parser.add_argument("--force", action="store_true", help="rebuild changed embeddings")
 
@@ -69,6 +74,11 @@ def main() -> None:
         else:
             for row in rows:
                 print(f"{row['id']}: {row['name']} ({row['kind']}) — {row['notes']}")
+        return
+    if args.command == "install-cli":
+        from .integrations import install_integrations
+
+        print(json.dumps(install_integrations(args.target, dry_run=args.dry_run, force=args.force), indent=2))
         return
     if args.command == "exegol-mcp":
         from .exegol_mcp import serve_stdio
