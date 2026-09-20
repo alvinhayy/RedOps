@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="assets/banner.svg" alt="RedOps RAG" width="900"><br>
+  <img src="assets/banner.svg?v=acffd23" alt="RedOps / Red Team Operators" width="900"><br>
 </h1>
 
 <h4 align="center">RedOps / Red Team Operators — source-grounded pentest knowledge, agent workflows, and safe tool execution.</h4>
