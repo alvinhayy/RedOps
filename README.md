@@ -2,7 +2,7 @@
   <img src="assets/banner.svg" alt="RedOps RAG" width="900"><br>
 </h1>
 
-<h4 align="center">RedOps — Red Team Operators: source-grounded pentest knowledge, agent workflows, and safe tool execution.</h4>
+<h4 align="center">RedOps / Red Team Operators — source-grounded pentest knowledge, agent workflows, and safe tool execution.</h4>
 
 <p align="center">
   <img src="https://img.shields.io/badge/platform-Python%203.11%2B-blue">
