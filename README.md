@@ -67,6 +67,18 @@ Lihat [tool matrix](agents/skill-tool-matrix.yaml) dan [MCP setup](docs/MCP-SETU
 
 RedOps dapat dipasang sebagai CLI mandiri dengan Python 3.11+:
 
+One-liner (macOS/Linux):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alvinhayy/RedOps/master/scripts/install.sh | bash
+```
+
+Installer menyimpan checkout di `~/.local/share/redops` dan CLI di `~/.local/bin/redops`.
+Override dengan `REDOPS_INSTALL_ROOT`, `REDOPS_BIN_DIR`, atau `REDOPS_REF`; installer
+tidak menghapus data dan tidak melakukan `git reset --hard`.
+
+Manual dengan pipx:
+
 ```bash
 pipx install git+https://github.com/alvinhayy/RedOps.git
 # atau dari checkout lokal:
