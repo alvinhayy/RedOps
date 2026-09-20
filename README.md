@@ -35,11 +35,33 @@ memiliki izin eksplisit untuk diuji.
 - jawaban dengan sitasi dan fallback extractive saat tidak ada LLM;
 - CLI dan REST API FastAPI;
 - backend eksekusi tool lokal atau Exegol dengan argv aman tanpa shell;
-- profil agent mobile untuk workflow Android/iOS berbasis Mobile-ReverseSkill;
+- 10 profil agent berbasis niche dengan wiring MCP dan tool yang eksplisit;
 - provenance berupa judul, heading, path lokal, dan URL asli;
 - provider registry untuk local extractive, OpenAI, Z.ai, DeepSeek, dan OrcaRouter;
 - installer adapter untuk Codex, Claude CLI, dan OpenCode;
 - bounded WAF timing benchmark dengan guardrail anti-DoS.
+
+## Agent Profiles
+
+RedOps bukan mobile-only. Router agent membaca niche knowledge, tool, MCP, dan guardrail
+masing-masing dari [`agents/registry.yaml`](agents/registry.yaml):
+
+| Agent | Fokus | Profil |
+|---|---|---|
+| AD | Active Directory, Entra ID, BloodHound, LDAP | [`ad.md`](agents/ad.md) |
+| Windows Red Team | Windows recon, privilege escalation, LOLBAS | [`windows-redteam.md`](agents/windows-redteam.md) |
+| Web | Web app, API, browser, WAF, CSRF/XSRF | [`web.md`](agents/web.md) |
+| Cloud | AWS, Azure, GCP, IAM, storage, workload | [`cloud.md`](agents/cloud.md) |
+| Mobile | Android/iOS, Frida, APK/IPA, runtime | [`mobile.md`](agents/mobile.md) |
+| Reversing | Binary analysis, malware triage, Ghidra/radare2 | [`reversing-tools.md`](agents/reversing-tools.md) |
+| Network | Network, protocol, wireless, pivoting | [`network.md`](agents/network.md) |
+| Container/DevOps | Docker, Kubernetes, CI/CD, supply chain | [`container-devops.md`](agents/container-devops.md) |
+| Web3 | Smart contract, DeFi, wallet, DApp | [`web3.md`](agents/web3.md) |
+| RAG Curator | Ingest, niche classification, noise cleanup, QA | [`rag-curator.md`](agents/rag-curator.md) |
+
+MCP inti RedOps hanya **Exegol**. Semua agent memakai tool yang sesuai profil melalui
+container Exegol, dengan knowledge path dan guardrail yang tetap terpisah per niche.
+Lihat [tool matrix](agents/skill-tool-matrix.yaml) dan [MCP setup](docs/MCP-SETUP.md).
 
 ## Installation
 
