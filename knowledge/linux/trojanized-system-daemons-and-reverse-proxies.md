@@ -1,0 +1,68 @@
+---
+title: "Trojanized System Daemons and Reverse Proxies"
+source: hacktricks.wiki
+source_url: https://hacktricks.wiki/linux-hardening/post-exploitation/linux-post-exploitation/trojanized-system-daemons-and-reverse-proxies.html
+fetched_at: 2026-09-20T09:50:19Z
+license: unspecified
+category: linux
+---
+
+## In-place daemon trojanization
+
+A reusable deployment pattern is to fingerprint the distribution, release, kernel, and CPU architecture, select a compatible ELF, decrypt it only in memory, overwrite the packaged executable, and restart its service. Embedding a RAT thread inside `crond`, `agetty`, `atd`, or `polkitd` then provides command execution, file transfer, reconnaissance, reverse shells, or a PTY without adding an obviously new long-running process. Reconnaissance of active services and listening ports can also let the operator choose a daemon that is installed and routinely active on that particular host.[\[1\]](#references)
+
+Merely checking `ps` output is therefore weak: both the process name and normal service behavior may look correct. Validate the on-disk executable against the distribution package, inspect build IDs and symbols, and compare the running `/proc/<pid>/exe` object with a clean package copy.[\[1\]](#references)
+
+### SSH password interception before authentication
+
+Instead of modifying PAM, an attacker can patch the SSH server’s password-authentication path itself. A change inside OpenSSH’s `userauth_passwd()` can copy the submitted plaintext password, omit attacker-controlled master passwords from collection, encrypt the remaining records, and then continue normal authentication. Successful and failed logins consequently behave as expected, while the trojanized `sshd` silently writes credential material.[\[1\]](#references)
+
+This distinction matters during triage: clean PAM configuration and modules do **not** prove that SSH password handling is clean. Verify the OpenSSH package and investigate files opened or written by `sshd`; one observed implementation stored encrypted credentials below `/var/lib/sshd/`.[\[1\]](#references)
+
+## Reverse-proxy-native backdoors
+
+A reverse proxy is an unusually powerful implant location because it handles traffic **after TLS termination**. Rather than using `LD_PRELOAD` or a separate proxy, malicious code can be compiled into HAProxy and register native filter callbacks, reuse its HTX parsed-message representation, memory pools, scheduler, body-editing API, master-worker lifecycle, and IPC. Legitimate forwarding continues, while the implant gains plaintext visibility into requests, responses, headers, and cookies.[\[1\]](#references)
+
+### Edge-only C2 hidden from backends
+
+A proxy implant can reserve an innocuous URL as a command endpoint and consume it entirely at the edge. One implementation extracted `HTX_BLK_DATA` request blocks into connection-specific FIFOs and then cleared channel fields such as `to_forward`, `output`, `buf.head`, and `buf.data`; the request was treated as consumed and never reached the upstream application. The dispatcher supported file upload/download, command execution, and configuration replacement, then used `send()` on the client socket to return an ordinary-looking HTTP response outside HAProxy’s normal response path.[\[1\]](#references)
+
+Because proxy-version-specific code can also decrement active-connection, cumulative-request, byte, and peak-rate counters, neither backend access logs nor the proxy dashboard is an authoritative record. Correlate independent edge packet or flow telemetry, operating-system sockets, HAProxy statistics, and backend logs; a client-visible request/response with no corresponding upstream transaction is a high-signal discrepancy.[\[1\]](#references)
+
+### Selective response injection
+
+Native filters can make a watering-hole payload extremely selective. The observed design gated injection on exact or `/24` source addresses, URL and `Referer` regexes, `User-Agent` and architecture, then rechecked response status and `Content-Type`. It also parsed attacker fields such as `mrt`, `msc`, and `mst` from `Accept-Language`; a valid operator identifier bypassed IP filtering, turning a common browser header into a covert authentication and control channel.[\[1\]](#references)
+
+After selecting a transaction, the filter can replace available HTX body chunks, adjust later filters’ offsets when the length changes, and append the remaining payload during repeated scheduler passes. Rewriting `Content-Type`/`Content-Disposition`, removing `Accept-Ranges`, and forcing `200 OK` helps conceal the substitution and permits a payload larger than the legitimate body.[\[1\]](#references)
+
+## Anti-forensics
+
+Daemon replacement can be followed by copying timestamps from a trusted executable and selectively removing only deployment-related lines from shell history, authentication, audit, and syslog files. This is less conspicuous than deleting entire logs. A staging file in `/tmp` may be used to rewrite each original, so preserve filesystem metadata and compare local records with remote or immutable logging before attempting cleanup.[\[1\]](#references)
+
+## Triage and hunting
+
+Package provenance, running-image inspection, filesystem artifacts, and cross-layer network correlation are more reliable than process-name allowlists for this technique.[\[1\]](#references)
+
+## Daemon and reverse-proxy triage commands
+
+```
+# Verify packaged daemons (run the command appropriate for the distribution)
+dpkg --verify openssh-server cron util-linux at policykit-1 haproxy 2>/dev/null
+rpm -V openssh-server cronie util-linux at polkit haproxy 2>/dev/null
+# Resolve the actual executable backing each suspicious daemon
+pgrep -x 'sshd|cron|crond|agetty|atd|polkitd|haproxy' | while read -r p; do
+  printf '%s  ' "$p"; readlink -f "/proc/$p/exe"
+done
+# Compare ELF identity and timestamps with clean vendor-package copies
+readelf -n /usr/sbin/sshd /usr/sbin/haproxy 2>/dev/null | grep -E 'File:|Build ID'
+stat -c '%n | birth=%w | mtime=%y | ctime=%z' /usr/sbin/sshd /usr/sbin/haproxy 2>/dev/null
+# Hunt example state/config/FIFO artifacts and unusual HAProxy control headers
+grep -RIE 'mrt=|msc=|mst=' /var/log/haproxy* 2>/dev/null
+find /root /var/lib /tmp -xdev \( -path '*/cache/haproxy-100?.cache*' -o -name 'c8c68e629bba773a10ac80012d10bf19' -o -name 'g580' -o -name 'g105' -o -name 't*_w.pipe' -o -name 'jasper-log' \) -ls 2>/dev/null
+strings -a /usr/sbin/{sshd,haproxy,crond} 2>/dev/null | grep -E 'ted_|atd_|favorite_list_2x_m500_ico'
+```
+Also inspect HAProxy’s process environment for unexpected `HAPROXY_MWORKER_PP_READ` or `HAPROXY_MWORKER_PP_WRITE` pipe descriptors that persist across reloads, search the binary for non-vendor filter callbacks or debug-name families, and compare locally recorded counters with upstream flow data. Timestamp equality is only a clue: on Linux, attacker-controlled `mtime` does not necessarily agree with inode `ctime`, package metadata, journal history, or remote audit records.[\[1\]](#references)
+
+## References
+
+- [1] [Rapid7 Labs - DPRK APTs: Ted backdoor and curlRAT target South Korean media and automotive sectors](https://rapid7.com/blog/post/tr-dprk-apts-ted-backdoor-curlrat-target-south-korean-media-automotive-sectors)

@@ -1,0 +1,40 @@
+---
+title: "One Gadget"
+source: hacktricks.wiki
+source_url: https://hacktricks.wiki/binary-exploitation/rop-return-oriented-programing/ret2lib/one-gadget.html
+fetched_at: 2026-09-20T09:50:19Z
+license: unspecified
+category: reversing
+---
+
+## Basic Information
+
+[`one_gadget`](https://github.com/david942j/one_gadget) searches a supplied `libc` for instruction sequences that can invoke `execve("/bin/sh", ...)` from a single entry address.[\[1\]](#references)
+
+Each reported gadget has constraints that must hold at the moment control reaches it. For example, a condition such as `[rsp+0x30] == NULL` requires that stack slot to contain a null value; other gadgets may require a writable register or a particular process-environment layout. Padding the payload with null values can satisfy some stack constraints, but always check the exact conditions printed for the selected `libc`.[\[1\]](#references)
+
+```
+ONE_GADGET = libc.address + 0x4526a
+rop2 = base + p64(ONE_GADGET) + "\x00"*100
+```
+The offsets reported by `one_gadget` are relative to the matching `libc`; add the runtime `libc` base address before using one in an exploit.
+
+A one-gadget can simplify a ROP chain or an arbitrary-write-to-execution technique, but only when all of the gadget’s constraints are satisfied.
+
+### ARM64
+
+The tool supports several architectures, including AArch64, but a particular `libc` may contain no usable gadget. In one recorded test against the AArch64 `libc` shipped with Kali 2023.3, `one_gadget` returned no gadget despite the architecture being supported.[\[1\]](#references)
+
+## Angry Gadget
+
+[`angry_gadget`](https://github.com/ChrisTheCoolHut/angry_gadget) uses [angr](https://github.com/angr/angr) to search for gadgets that reach `execve('/bin/sh', NULL, NULL)` and to reason about their constraints. It can produce additional candidates when `one_gadget` does not find a practical match.[\[2\]](#references)[\[3\]](#references)
+
+```
+pip install angry_gadget
+angry_gadget.py examples/libc6_2.23-0ubuntu10_amd64.so
+```
+## References
+
+- [1] [one_gadget - Find `execve("/bin/sh")` gadgets in `libc`](https://github.com/david942j/one_gadget)
+- [2] [angry_gadget - Find one-gadgets with angr and satisfiability](https://github.com/ChrisTheCoolHut/angry_gadget)
+- [3] [angr binary-analysis framework](https://github.com/angr/angr)

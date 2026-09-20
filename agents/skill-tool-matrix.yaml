@@ -1,0 +1,74 @@
+version: 1
+name: redops-skill-tool-matrix
+description: >-
+  Audit mapping from installed local skills to RedOps agent profiles, executables,
+  MCP connectors, health checks, and safe fallbacks.
+policy:
+  authorization: written authorization and an in-scope target are required
+  execution_order: [exegol, approved_mcp, terminal-bounded]
+  availability: tool names are capabilities; verify them in the selected runtime before use
+  gaps: missing optional tools are reported, never installed automatically or made mandatory
+skills:
+  mobile-vuln-hunt:
+    owner_agents: [mobile_agent]
+    knowledge_niches: [mobile, reversing, vulnerabilities, web, network, methodology]
+    executables:
+      required: [rg, adb]
+      optional: [semgrep, jadx, apktool, frida, drozer, otool, nm, strings, plutil, class-dump]
+    mcp:
+      required: []
+      optional: [redops-exegol, uiautomator2, burp]
+    health_checks:
+      - "command -v rg adb"
+      - "command -v semgrep jadx apktool frida drozer || true"
+      - "adb devices -l"
+      - "MCP health/capabilities for uiautomator2, Burp, and redops-exegol"
+    fallback: >-
+      Run Tier-1 ripgrep/static checks over authorized jadx/apktool/classdump/otool
+      output; use the RAG workflow when optional dynamic tooling is unavailable.
+    gaps:
+      - semgrep, drozer, and frida-ios-dump are referenced by the skill but are not declared in .mcp.json.example.
+      - No dedicated Frida MCP is declared; use Exegol or bounded terminal on a disposable authorized device.
+      - iOS otool/nm/class-dump availability is host/platform dependent and must be checked.
+  reverse-engineer:
+    owner_agents: [reversing_tools_agent, mobile_agent]
+    knowledge_niches: [reversing, malware, mobile, windows, linux, web, vulnerabilities, methodology]
+    executables:
+      required: [file, strings, find, unzip]
+      optional: [apktool, jadx, dex2jar, baksmali, androguard, otool, plutil, class-dump, codesign, node, npx, trufflehog, gitleaks, docker]
+    mcp:
+      required: []
+      optional: [redops-exegol, ghidra, radare2, terminal-bounded]
+    health_checks:
+      - "command -v file strings find unzip"
+      - "command -v jadx apktool r2 objdump otool plutil || true"
+      - "MCP health/capabilities for ghidra and radare2"
+      - "redops exegol status"
+    fallback: >-
+      Use bounded local static inspection with standard Unix tools and preserve the
+      input hash. Docker/Exegol is a tool-environment fallback, not permission to execute a target.
+    gaps:
+      - No dedicated MCP is declared for Android decompilers, iOS class-dump, or secret scanners.
+      - Docker is mentioned by the skill as a fallback but is not an MCP connector; verify Exegol/Docker separately.
+      - Skill guidance to show full secrets conflicts with RedOps secret policy; reports must keep secrets private.
+  afl-fuzzing:
+    owner_agents: [mobile_agent]
+    knowledge_niches: [mobile, reversing, vulnerabilities, tools, methodology]
+    executables:
+      required: [adb]
+      optional: [afl-fuzz, clang, llvm-objdump, ndk-build, timeout, make]
+    mcp:
+      required: []
+      optional: [redops-exegol, terminal-bounded, radare2]
+    health_checks:
+      - "command -v adb"
+      - "command -v afl-fuzz clang llvm-objdump ndk-build make || true"
+      - "adb devices -l"
+      - "MCP health/capabilities for redops-exegol and radare2"
+    fallback: >-
+      Stop fuzzing if no disposable authorized Android emulator/device is available;
+      perform offline ELF metadata review only. A negative fuzz result is invalid until
+      the harness positive-control reaches the parser.
+    gaps:
+      - AFL++/frida-mode and Android NDK are not declared as MCP servers or mandatory dependencies.
+      - No dedicated device/fuzzing MCP is declared; adb through bounded terminal or Exegol is the safe route.

@@ -1,0 +1,39 @@
+{
+  "mcpServers": {
+    "redops-exegol": {"command": "redops", "args": ["exegol-mcp"]},
+    "uiautomator2": {
+      "command": "/absolute/path/uiautomator2-mcp/.venv/bin/python",
+      "args": ["/absolute/path/uiautomator2-mcp/server.py"]
+    },
+    "burp": {
+      "command": "/absolute/path/burp-mcp/.venv/bin/python",
+      "args": ["/absolute/path/burp-mcp/server.py"],
+      "env": {"BURP_API_URL": "http://127.0.0.1:1337", "BURP_API_TOKEN": "${BURP_API_TOKEN}"}
+    },
+    "camoufox": {
+      "command": "/absolute/path/camoufox-mcp/.venv/bin/python",
+      "args": ["/absolute/path/camoufox-mcp/server.py"],
+      "env": {"CAMOUFOX_HEADLESS": "true"}
+    },
+    "terminal-bounded": {
+      "command": "/absolute/path/terminal-mcp/.venv/bin/python",
+      "args": ["/absolute/path/terminal-mcp/server.py"],
+      "env": {"TERMINAL_MCP_WORKSPACE": "/absolute/path/engagements/current", "TERMINAL_MCP_ALLOWED_COMMANDS": "adb,frida,jadx,apktool,pytest,redops"}
+    },
+    "bloodhound-ad-only": {
+      "command": "/absolute/path/bloodhound-mcp/.venv/bin/python",
+      "args": ["/absolute/path/bloodhound-mcp/server.py"],
+      "env": {"BLOODHOUND_URL": "http://127.0.0.1:8080", "NEO4J_URI": "bolt://127.0.0.1:7687", "BLOODHOUND_TOKEN": "${BLOODHOUND_TOKEN}"}
+    },
+    "ghidra": {
+      "command": "/absolute/path/ghidra-mcp/.venv/bin/python",
+      "args": ["/absolute/path/ghidra-mcp/server.py"],
+      "env": {"GHIDRA_PROJECT_DIR": "/absolute/path/engagements/current/ghidra"}
+    },
+    "radare2": {
+      "command": "/absolute/path/radare2-mcp/.venv/bin/python",
+      "args": ["/absolute/path/radare2-mcp/server.py"],
+      "env": {"R2_WORKSPACE": "/absolute/path/engagements/current/static"}
+    }
+  }
+}

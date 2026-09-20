@@ -1,0 +1,98 @@
+---
+title: Hide n' Seek with Android App Protections and Beat EMPDF
+source_url: https://www.slideshare.net/slideshow/aan-wahyu-hide-n-seek-with-android-app-protections-and-beat-empdf/263331392
+fetched_at: 2026-09-20T01:59:49Z
+license: unspecified
+category: mobile/android
+---
+Download as PDF, PPTX
+
+- 1. By Aan @petruknisme Hide`n seek with Android App Protections & Beat `em
+- 2. HELLO! I’m… Aan Wahyua.k.a petruknisme ● Lead Security Consultant @ Horangi ● Infosec Enthusiast & Part-time coder ● Passionate with OSINT, RE, and Red Team
+- 3. Background Along with therapid development of mobile application technology meeting various needs and providing convenience to their users. In this case, significant developments are also needed in the security aspect that guarantees privacy and security, especially user data. Therefore, a penetration testing or application audit process is needed to ensure that an application is suitable for use by the public. If this is not done properly, there is a high possibility of data leakage resulting in losses on the user side and on the company.
+- 4. Background To prevent modification,manipulation or hacking, it is not uncommon for developers to apply protection to applications. This aims to minimize losses that could occur. As someone who works as a penetration tester, For applications can be tested properly, it is often necessary to bypass the implemented protection so that the required tools or processes can run according to the predetermined penetration testing workflow.
+- 5. Table of contents RootDetection 01 03 02 04 SSL Pinning Anti Emulation Frida Detection
+- 6.
+- 7. Root Detection To preventmodifications or manipulations that impact the application, root detection is implemented. Basically, the application will check files that are indicated to be part of the rooted device and when it finds this indication, the application will prevent access or perform an exit/crash so that the application cannot run on a rooted device.
+- 8. Checking the BUILD tagfor test-keys Checking SU binary and installed root package Root Detection Methods Checking common root cloaking apps Checking permission for system directory Checking dangerous props Many more
+- 9.
+- 10.
+- 11. Reverse Engineering Apk Process Several processesare required in reverse engineering an APK. Start by unpacking the APK using an archive extractor such as WinRAR, WinZip, etc. After that, the dex file will be disassembled and decompiled into java source which is still a java class file.
+- 12. 01.1 Bypassing root detectionusing manual modification of smali Manual Modification
+- 13. Extracting Apk To bypassroot detection using the smali patch method, the first step that must be done is to extract the content in the apk using apktool
+- 14. Searching the rightfunction Then we can search for the word isRooted with the help of a code editor. In this example case, the isRooted function is in the Rootbeer.smali file As you can see, isRooted function are calling other function for checking: 1. Su Binary 2. RW Paths 3. Root via Native Checks 4. Magisk Specific checks 5. etc
+- 15. Bypassing checkForSuBinary In thecheckForSuBinary() function, change move-result v0 to const/4 v0, 0x0 with the aim of making the value of the variable v0 false instead of to taking a dynamic value from the result of the checkForBinary() function .method public checkForSuBinary()Z .locals 1 const-string v0, "su" .line 160 invoke-virtual {p0, v0}, Lcom/scottyab/rootbeer/RootBeer;->checkForBinary(Ljava/lang/String;)Z const/4 v0, 0x0 <-- Edited return v0
+- 16. Bypassing checkSuExist In thecheckSuExist() function, change value of v0 to 0x0 after if-eqz v2
+- 17. Bypassing checkForRWPaths In thecheckForRWPaths() function, add return v1 at the end of the function so that the function always returns false because the v1 variable is already false.
+- 18. Bypassing checkForRootNative In thecheckForRootNative() function, change the v1 value at the end of the function to 0x0 so that the returned value is false. .method public checkForRootNative()Z ---------------------SNIPPET------------- if-lez v0, :cond_2 const/4 v1, 0x0 <-- Edited :catch_0 :cond_2 return v1 .end method
+- 19. Bypassing checkForMagiskBinary In thecheckForMagiskBinary() function, change move-result v0 to const/4 v0, 0x0 with the aim of making the value of the variable v0 false instead of taking a dynamic value from the result of the checkForBinary() function
+- 20. Rebuild, sign andinstall
+- 21. Result We are successfullybypassing root detection with manual modification of smali files
+- 22. 01.2 Bypassing root detectionusing frida instrumentation Frida Instrumentation
+- 23. Frida Instrumentation As weknow, we need to bypass these protection to be able to run the app in rooted device: ● SU Binary ● RW Paths ● Root via Native Checks ● Magisk Specific Checks I assume that we already know how to write frida script. For the first step, we will try to hook one of the function to make sure that our script is working
+- 24.
+- 25. Final frida Script Forthe rest of functions, we just need to copy and modify with the function name that we will hook. But, for keeping it simple(KISS) and follow DRY principle, I’ve modified the script to be more simple, short, and easy to understand.
+- 26.
+- 27. 01.3 Bypassing root detectionusing objection Objection
+- 28. What? objection is aruntime mobile exploration toolkit, powered by Frida, built to help you assess the security posture of your mobile applications, without needing a jailbreak. ● Supports both iOS and Android. ● Inspect and interact with container file systems. ● Bypass SSL pinning. ● Dump keychains. ● Perform memory related tasks, such as dumping & patching. ● Explore and manipulate objects on the heap. ● And much, much more… Installation Installation is simply a matter of pip3 install objection. This will give you the objection command. You can update an existing objection installation with pip3 install --upgrade objection.
+- 29.
+- 30. No need script,only command line
+- 31. No need script,only command line Partially success bypassing rootbeer checker with objection command “android root disable”
+- 32. Hook & patchthe right function Before patching the functions, we need to know the class first android hooking list class_methods com.example.app.class
+- 33. Set return value Afterwe know the right class_methods, we can set the return value android hooking set return_value com.app.example.class.method
+- 34. 01.4 Bypassing root detectionusing Magisk Zygisk Magisk Zygisk
+- 35. Magisk In simple terms,Magisk is a tool to help users gain root access by patching the ROM. For further information regarding installation and configuration, please refer to https://github.com/topjohnwu/Magisk The easiest method is to rely on Zygisk Denylist in the Magisk application. To be able to enjoy Zygisk, Magisk version that must be installed is v24.1+.
+- 36.
+- 37.
+- 38.
+- 39.
+- 40. SSL Pinning SSL pinningis a technique that helps to prevent MiTM attacks by hardcoding the SSL/TLS certificate’s public key into the app or device. This means that when the app or device communicates with the server, it will compare the server’s SSL/TLS certificate’s public key with the one that is hardcoded into the app or device. https://www.indusface.com/learning/what-is-ssl-pinning-a-quick-walk-through/
+- 41. 02.1 Bypassing SSL Pinningusing manual modification of smali Manual Modification
+- 42. Manual In this discussion,I will start by explaining how we can bypass the SSL Pinning process by manually modifying smalis. The target that will be used in this case study is an android application that use Cordova Framework. When connecting to the server, the application refused the connection because the certificate on the device did not match, because I was intercept the traffic using Burp Suite. With the help of “adb logcat | logcat-color”, I can find out the error message given by the application when it refuses a connection to the server.
+- 43. Manual As you cansee, android certificate pinning is failing and complaining about mismatch certificate hash. Our peer certificate chain is for PortSwigger(BurpSuite), but the Pinned Certificate for a domain(masked) is defined in the android resource file.
+- 44. Best Approach Decompile apkand search for the right string. In this case, the file containing the word is in resource/assets/www/pinning/ . After knowing which file is appropriate, the next step is to modify the string sha256/dGxxxxx to sha256/fKxxxxx referring to the previous error message.
+- 45.
+- 46.
+- 47. 02.2 Bypassing SSL Pinningusing Objection Objection
+- 48. Approach As in thediscussion for bypassing root detection, we can also do the same thing with the help of objection. There are two methods that can be done, using the built-in objection feature or manual patching of the return_value from class_method. For the study case, we will use https://github.com/httptoolkit/android-s sl-pinning-demo/releases/download/v1. 3.1/pinning-demo.apk
+- 49. Approach Error when interceptedwith burpsuite
+- 50.
+- 51.
+- 52.
+- 53. 02.3 Bypassing SSL Pinningusing Frida Frida
+- 54. Frida For bypassing SSLPinning with Frida, we can use frida codeshare or create our own script.
+- 55. Frida-codeshare Bypassing previous sslpinning protection that failed when using objection, we can use frida codeshare from https://codeshare.frida.re/@akabe1/frida-multiple-unpinning/
+- 56. Frida scripting For manualapproach, we can search the right function, hook, replace the return value same as in the bypassing root detection
+- 57. 02.4 Bypassing Flutter SSLPinning Bypassing Flutter
+- 58. Flutter One of thereasons it is difficult to bypass SSL Pinning in Flutter is because Flutter compiles the code into native machine code. This makes common techniques such as method hooking or code injection in SSL Pinning bypass unable to be carried out, even the experiments that we have carried out previously. Flutter ignores proxy settings on the device so that applications cannot be intercepted. If in the previous case the application would error when passing through the proxy without the SSL pinning bypass process, this does not apply to Flutter because the application will only make a direct connection to the server without passing through the proxy even though it has been set on the device.
+- 62. 02.4.1 Bypassing Flutter SSLPinning using reFlutter reFlutter
+- 63. reFlutter This framework helpswith Flutter apps reverse engineering using the patched version of the Flutter library which is already compiled and ready for app repacking. This library has snapshot deserialization process modified to allow you perform dynamic analysis in a convenient way. Key features: ● socket.cc is patched for traffic monitoring and interception; ● dart.cc is modified to print classes, functions and some fields; ● display absolute code offset for functions ● contains minor changes for successfull compilation; ● if you would like to implement your own patches, there is manual Flutter code change is supported using specially crafted Dockerfile
+- 64.
+- 65.
+- 66.
+- 67. 02.4.1 Bypassing Flutter SSLPinning Ghidra & Frida pattern matching Frida Pattern Matching
+- 68. Concepts Referring to thearticle https://blog.nviso.eu/2022/08/18/intercept-flutter-traffic-on-ios-and-android-http-h ttps-dio-pinning/, to bypass SSL pinning on Flutter , we can use the pattern matching method after knowing the pattern of the SSL pinning checking offset address. In simple terms, the steps taken are: ● Find references to the string “x509.cc” and compare them to x509.cc to ﬁnd session_verify_cert_chain ● Find references to the method you identiﬁed in order to identify ssl_verify_peer_cert
+- 69.
+- 70.
+- 71. Concepts Alternatively, we canuse Frida’s pattern matching engine to search for functions that look very similar to the function from the demo app. The first bytes of a function are typically very stable, as long as the number of local variables and function arguments don’t change. Still, different compilers may generate different assembly code (e.g. usage of different registers or optimisations) so we do need to have some wildcards in our pattern. https://blog.nviso.eu/2022/08/18/intercept-flutter-traffic-on-ios-and-android-http-https-dio-pinning/
+- 72.
+- 73.
+- 74. Emulator Detection Emulators areusually used to make it easier for reverse engineers, hackers or pentesters to run applications without needing to have the original device. Because usually, emulators can be easily created and deleted when there are errors or different needs, whereas the original device cannot. It is not uncommon for malware developers to use this check to ensure that their application is able to obtain or control the victim's original data or device. For this case study, we will use https://github.com/reveny/Android-Emulator-Detection/ The app detect emulator with this checks: ● checkHardware(); ● checkMounts(); ● checkModules(); ● checkCPU(); ● checkFiles(); ● checkCPUArchitecture();
+- 75.
+- 76. Concepts Different from theprevious discussion, this time our target is using the Java Native Interface. So, we can't do hooking like we did before. This is because all checking processes occur in libraries that have been compiled into objects. In this example, all the checks are in the libemulatordetector.so file. The first thing we have to do is find out what JNI functions are available, you can use Frida's help or use nm demangle.
+- 77. Bypass To bypass, thefirst thing to do is tracing with frida-trace. In this case, I will specifically look for the dlopen function because this function is usually used to load shared libraries. It can be seen that what is used is android_dlopen_ext to load the shared library file libemulatordetector.so. So with this info, we can create code to hook Frida.
+- 78. When we runFrida with this code, we can see that libemulatordetector.so is loaded from the android_dlopen_ext function
+- 82.
+- 83. Concepts In some cases,developers create protection so that the application checks the existence of Frida on the device. This is to prevent pentesters/hackers from being able to run Binary Instruments using Frida as in the previous discussion. There are several mechanisms used to detect the presence of frida, including: ● Detection of named pipes used by Frida ● Detect frida specific thread names ● Detect the port used by Frida ● Etc For this discussion, I used a customized application to detect frida existence
+- 84. Concepts In some cases,developers create protection so that the application checks the existence of Frida on the device. This is to prevent pentesters/hackers from being able to run Binary Instruments using Frida as in the previous discussion. There are several mechanisms used to detect the presence of frida, including: ● Detection of named pipes used by Frida ● Detect frida specific thread names ● Detect the port used by Frida ● Etc For this discussion, I used a customized application to detect frida existence
+- 85.
+- 86. Frida-server detection The mechanismused by the application to detect frida-server is to check whether there are files in /data/local/tmp/frida-se rver.
+- 87.
+- 88. /proc detection The mechanismused is to check /proc/self/maps to detect the presence of frida-agent
+- 89.
+- 90. Default frida portdetection Another mechanism is to check the default Frida port, if the default port can be accessed then that indicates Frida is running
+- 91. Default frida portdetection To bypass this protection, we can change the default port used when running frida-server with the following command
+- 92. Default frida portdetection
+- 93. Frida Thread Detection Theapplication detects the Frida thread by checking /proc/self/task/<PID>/status and comparing its contents with FRIDA_THREAD_GUM_JS_LOOP and FRIDA_THREAD_GMAIN.
+- 94. Frida Thread Detection Tobypass this protection, we can easily manipulate the strstr function every time we find the specified words
+- 95. CREDITS: This presentationtemplate was created by Slidesgo, and includes icons by Flaticon, and infographics & images by Freepik Thanks! me@petruknisme t.me/@petruknisme linkedin.com/in/aancw Do you have any questions? Please keep this slide for attribution

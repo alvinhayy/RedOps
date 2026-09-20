@@ -1,0 +1,12 @@
+services:
+  redops:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      REDOPS_DB_PATH: /app/data/redops.db
+      REDOPS_KNOWLEDGE_DIR: /app/knowledge
+    volumes:
+      - ./data:/app/data
+      - ./knowledge:/app/knowledge:ro
+

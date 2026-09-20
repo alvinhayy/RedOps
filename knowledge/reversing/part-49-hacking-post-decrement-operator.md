@@ -1,0 +1,39 @@
+---
+title: "ARM-32 Course 2 \u2014 Part 49 \u2013 Hacking Post-Decrement Operator"
+source: 0xInfection/reversing
+source_url: https://raw.githubusercontent.com/0xInfection/reversing/gh-pages/pages/part-49-hacking-post-decrement-operator.md
+fetched_at: 2026-09-20T19:09:00Z
+license: unspecified
+category: reversing
+---
+
+For a complete table of contents of all the lessons please click below as it will give you a brief of each lesson in addition to the topics it will cover.&nbsp;https://github.com/mytechnotalent/Reverse-Engineering-Tutorial
+
+Let's once again review our code.
+
+<pre spellcheck="false">#include &lt;iostream&gt;
+
+int main(void) {
+&nbsp;&nbsp; &nbsp;int myNumber = 16;
+&nbsp;&nbsp; &nbsp;int myNewNumber = myNumber--;
+
+&nbsp;&nbsp; &nbsp;std::cout &lt;&lt; myNewNumber &lt;&lt; std::endl;
+    std::cout &lt;&lt; myNumber &lt;&lt; std::endl;
+
+&nbsp;&nbsp; &nbsp;return 0;
+}
+</pre>
+
+Let's review last week's debug.
+
+<div class="slate-resizable-image-embed slate-image-embed__resize-full-width"><img src="/imgs/1532690049930.jpg"/></div>
+
+As we can see here the value in __r1__ at __main+68__ is __15__. Let's hack!
+
+<div class="slate-resizable-image-embed slate-image-embed__resize-full-width"><img src="/imgs/1532690140517.jpg"/></div>
+
+Once again we have manipulated and changed program execution to our own bidding. With each of these bite-size lessons you continue to get a better grasp on the processor and how it interfaces with the binary.
+
+I hope this series gives you a solid framework for understanding the ARM processor. This concludes the series. Thank you all for coming along on the journey!
+
+_Upstream: mytechnotalent/Reverse-Engineering (Reverse Engineering For Everyone series), rendered by the 0xInfection/reversing gitbook._

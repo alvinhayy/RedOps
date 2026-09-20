@@ -1,0 +1,185 @@
+# RedOps RAG
+
+Framework RAG lokal untuk mencari dan menjawab berdasarkan knowledge pentest yang dapat
+ditelusuri kembali ke sumbernya. Gunakan hanya pada sistem yang Anda miliki atau memiliki
+izin eksplisit untuk diuji.
+
+## Fitur
+
+- ingestion Markdown yang idempotent dan heading-aware;
+- hybrid retrieval: SQLite FTS5 + cosine vector dengan reciprocal-rank fusion;
+- embedding hashing lokal tanpa API sebagai konfigurasi awal;
+- adaptor embedding dan chat API yang kompatibel dengan OpenAI;
+- jawaban dengan sitasi dan fallback extractive saat tidak ada LLM;
+- CLI dan REST API FastAPI;
+- backend eksekusi tool lokal atau Exegol dengan argv aman tanpa shell;
+- profil agent mobile untuk workflow Android/iOS berbasis Mobile-ReverseSkill;
+- provenance berupa judul, heading, path lokal, dan URL asli.
+
+## Mulai cepat
+
+Persyaratan: Python 3.11+ dan SQLite yang mendukung FTS5.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e '.[dev]'
+cp .env.example .env
+redops ingest
+redops stats
+redops query "Bagaimana melakukan enumerasi Active Directory?"
+```
+
+Variabel `.env` tidak otomatis dimuat oleh aplikasi. Ekspor variabel yang diperlukan,
+atau jalankan dengan alat seperti `dotenv`/Docker Compose. Default aman dan lokal bisa
+langsung dipakai tanpa `.env`.
+
+Untuk menjalankan API:
+
+```bash
+redops serve --host 0.0.0.0 --port 8000
+curl -s http://localhost:8000/health
+curl -s http://localhost:8000/v1/query \
+  -H 'content-type: application/json' \
+  -d '{"question":"Jelaskan jalur enumerasi LDAP", "top_k":6}'
+```
+
+Dokumentasi interaktif tersedia di `http://localhost:8000/docs`.
+
+## Eksekusi tool melalui Exegol
+
+Exegol harus sudah terpasang dan container telah disiapkan sesuai dokumentasi resmi
+di [docs.exegol.com](https://docs.exegol.com/). Gunakan hanya terhadap target dengan
+otorisasi tertulis. RedOps tidak mengubah isolasi, jaringan, atau hak akses Exegol.
+
+```bash
+export REDOPS_EXECUTION_BACKEND=exegol
+export REDOPS_EXEGOL_CONTAINER=redops
+export REDOPS_EXEGOL_IMAGE=full
+export REDOPS_EXEGOL_TIMEOUT=120
+redops exegol status
+redops exegol exec -- nmap -sV 192.0.2.10
+```
+
+`redops exegol exec -- ...` meneruskan setiap argumen sebagai daftar argv dan tidak
+menjalankan shell. `REDOPS_EXEGOL_TMP=true` meneruskan opsi temporary container dan
+`REDOPS_EXEGOL_VERBOSE=true` meneruskan verbose ke Exegol. Backend default tetap `local`;
+set `REDOPS_EXECUTION_BACKEND=exegol` secara eksplisit untuk menggunakan Exegol.
+
+## Agent mobile
+
+Gunakan [`agents/mobile.md`](agents/mobile.md) dan [dokumentasi mobile](docs/mobile-agent.md)
+untuk workflow APK/AAB/IPA: detect stack, static analysis, attack-surface review,
+vulnerability hunt, konfirmasi Frida/Exegol di lab lokal, dan fuzzing native
+opsional pada emulator offline. Static analysis tidak menjalankan aplikasi target;
+semua pengujian harus memiliki otorisasi tertulis.
+
+Runtime Android bersifat opsional dan memakai server eksternal
+[`uiautomator2-mcp`](docs/MCP-SETUP.md). Exegol MCP tetap tersedia untuk tool dalam
+container terisolasi. Tidak ada dependency MCP atau token yang ditambahkan ke
+instalasi default.
+
+Routing connector opsional Burp, Camoufox, Ghidra, radare2, dan terminal bounded
+untuk mobile tersedia di [`docs/mcp-tools.md`](docs/mcp-tools.md), dengan template
+non-secret [`.mcp.json.example`](.mcp.json.example). BloodHound dicadangkan untuk
+agent AD/identity, bukan mobile. Kebijakan tetap Exegol-first.
+
+### MCP Exegol
+
+Untuk produksi, gunakan paket resmi Exegol MCP (`pipx install exegol-mcp`) dan
+ikuti `exegol-mcp --print-config`. Endpoint HTTP dan bearer token harus dikelola
+oleh secret manager atau environment eksternal; RedOps tidak menyimpan token.
+RedOps menyediakan adapter stdio opsional yang tipis:
+
+```bash
+export REDOPS_EXECUTION_BACKEND=exegol
+redops exegol-mcp
+```
+
+Adapter hanya menyediakan `exegol_status` dan `exegol_exec` (command wajib berupa
+list argv, tanpa shell). Contoh konfigurasi klien:
+
+```json
+{"mcpServers":{"redops-exegol":{"command":"redops","args":["exegol-mcp"]}}}
+```
+
+## Provider model dan CLI
+
+RedOps mendukung provider yang tersedia di konfigurasi OpenCode: local extractive, OpenAI,
+Z.ai/GLM, DeepSeek, dan OrcaRouter. Lihat [docs/providers.md](docs/providers.md) untuk
+environment variable, model selector, dan command CLI masing-masing provider. Registry dapat
+dilihat tanpa menampilkan secret:
+
+```bash
+redops providers
+redops providers --json
+```
+
+## WAF timing benchmark (bounded)
+
+RedOps menyediakan benchmark timing untuk target yang telah diotorisasi. Amplifikasi
+hanya memakai URL response yang dipilih eksplisit, maksimum 30 sampel, delay minimum
+100 ms, dan batas ukuran response. Payload besar, POST/DoS, IP rotation, dan cross-site
+timing tidak diimplementasikan. `--lab-mode` hanya memperbolehkan amplifier lokal/private
+atau URL yang dimasukkan ke allowlist untuk staging/lab milik sendiri.
+
+```bash
+redops waf benchmark \
+  --baseline-url https://staging.example.test/normal \
+  --test-url https://staging.example.test/test \
+  --amplifier-url https://staging.example.test/long-response \
+  --allowlist https://staging.example.test/ --samples 10 --delay 1
+```
+
+Gunakan hanya pada aplikasi milik sendiri atau engagement dengan izin tertulis.
+
+Default `hash` bersifat ringan dan cukup untuk bootstrap, tetapi model embedding khusus
+akan meningkatkan relevansi semantik. Endpoint OpenAI resmi maupun server lokal yang
+menyediakan API kompatibel dapat digunakan:
+
+```bash
+export REDOPS_EMBEDDING_PROVIDER=openai
+export REDOPS_EMBEDDING_MODEL=text-embedding-3-small
+export REDOPS_LLM_PROVIDER=openai
+export REDOPS_LLM_MODEL=gpt-4.1-mini
+export REDOPS_API_BASE_URL=https://api.openai.com/v1
+export REDOPS_API_KEY='...'
+redops ingest --force
+redops query "Apa indikator delegation yang berisiko?"
+```
+
+Jangan commit API key. Perubahan provider/model/dimensi embedding memerlukan
+`redops ingest --force` agar query dan index tetap konsisten.
+
+## Format knowledge
+
+Semua `knowledge/**/*.md` akan diindeks. Front matter berikut direkomendasikan agar
+sitasi mengarah ke sumber asli:
+
+```markdown
+---
+title: Kerberos Delegation
+source_url: https://example.org/original-page
+fetched_at: 2026-09-20T00:00:00Z
+---
+
+# Kerberos Delegation
+...
+```
+
+Corpus dan alat refresh di dalam `knowledge/` dikelola terpisah dari framework. Setelah
+refresh, jalankan `redops ingest`; hanya dokumen berubah yang dihitung ulang.
+
+## Pengujian
+
+```bash
+pytest
+ruff check .
+```
+
+## Batasan desain
+
+Backend SQLite melakukan pemindaian vector in-process. Ini sederhana dan ideal untuk
+corpus dokumentasi kecil/menengah. Untuk jutaan chunk, implementasikan backend `IndexStore`
+dengan vector database tanpa mengubah antarmuka service/API. Fallback extractive bukan LLM:
+ia mengembalikan cuplikan sumber, sehingga selalu eksplisit dan dapat diverifikasi.

@@ -1,0 +1,134 @@
+---
+title: "ImageMagick Security"
+source: hacktricks.wiki
+source_url: https://hacktricks.wiki/network-services-pentesting/pentesting-web/imagemagick-security.html
+fetched_at: 2026-09-20T09:50:19Z
+license: unspecified
+category: network
+---
+
+## SVG -> MVG injection -> `msl:` execution
+
+`msl:` execution
+When ImageMagick rasterizes SVG, it first emits an intermediate **MVG** script. If attacker-controlled SVG data reaches that generated MVG without normalizing both LF and CR, an XML-encoded carriage return (`
+`) can become a **new MVG line**.[\[2\]](#references)
+
+A practical injection point is the `<polyline points="...">` attribute because the points string is copied into MVG almost verbatim. A payload like:[\[2\]](#references)
+
+```
+<polyline points="0,0 50,50
+image Over 0,0 1,1 'msl:/tmp/payload.msl'
+100,0"/>
+```
+can turn one SVG attribute into attacker-controlled MVG commands.[\[2\]](#references)
+
+The most useful primitive is:[\[2\]](#references)
+
+```
+image Over X,Y W,H 'URL'
+```
+This does **not** only load remote HTTP resources. It can also trigger internal coders / protocol handlers such as `data:` and `msl:`.[\[2\]](#references)
+
+If `msl:` is reachable, an attacker can execute **Magick Scripting Language** from disk and turn the bug into **arbitrary file write**:[\[2\]](#references)
+
+```
+<image>
+  <read filename="xc:red[10x10]"/>
+  <write filename="png:/var/www/html/poc.png"/>
+</image>
+```
+This is different from older ImageTragick payloads: instead of directly trying to get shell metacharacters into a delegate command, the chain abuses **MVG line injection** and then pivots into a **second-stage MSL script**.[\[2\]](#references)
+
+## Ghostscript delegate as the file dropper
+
+ImageMagick usually sends **EPS/PS/PDF** work to a **Ghostscript delegate**. That matters even for an SVG upload, because injected MVG can load an embedded:
+
+```
+data:image/x-eps;base64,...
+```
+payload.[\[2\]](#references)
+
+In the published **ImagePanick** repro, Ghostscript `10.06.0` running under SAFER can be abused as a file dropper:[\[2\]](#references)[\[3\]](#references)
+
+- `.tempfile` creates a writable temp file and also extends the read/write/control permit lists for that temp path.
+- `writestring` stores attacker-controlled MSL bytes.
+- `renamefile` moves the random temp name to a predictable filename such as`/tmp/payload.msl` .
+
+Then a second injected MVG line loads:[\[2\]](#references)
+
+```
+msl:/tmp/payload.msl
+```
+and ImageMagick executes the MSL, producing **arbitrary file write**. From there, writing into a web root, cron path, shell init file, or `authorized_keys` is usually enough for practical RCE or persistence.[\[2\]](#references)
+
+For more Ghostscript-centric notes, see [Ghostscript Injection](../../pentesting-web/formula-csv-doc-latex-ghostscript-injection.html).
+
+## Quick triage
+
+If a target processes untrusted images, first check which dangerous coders and delegates are still available:
+
+```
+magick -list policy
+identify -list format | grep -E 'SVG|MSL|PS|EPS|PDF'
+convert -list delegate | grep -iE 'gs|ghostscript'
+find / -iname policy.xml 2>/dev/null
+```
+If the application accepts SVG and the backend simply does:
+
+```
+magick input.svg output.png
+```
+that alone may be enough to trigger the chain when weak policies and a Ghostscript delegate are present.
+
+## Towards Safer Policies
+
+To address these challenges, a [tool has been developed](https://imagemagick-secevaluator.doyensec.com/) to aid in designing and auditing ImageMagick’s security policies. This tool is rooted in extensive research and aims to ensure policies are not only robust but also free from loopholes that could be exploited.[\[1\]](#references)
+
+## Allowlist vs Denylist Approach
+
+Historically, ImageMagick policies relied on a denylist approach, where specific coders were denied access. However, changes in ImageMagick 6.9.7-7 shifted this paradigm, enabling an allowlist approach. This approach first denies all coders and then selectively grants access to trusted ones, enhancing the security posture.[\[1\]](#references)
+
+```
+  ...
+  <policy domain="coder" rights="none" pattern="*" />
+  <policy domain="coder" rights="read | write" pattern="{GIF,JPEG,PNG,WEBP}" />
+  ...
+```
+## Case Sensitivity in Policies
+
+It’s crucial to note that policy patterns in ImageMagick are case sensitive. As such, ensuring that coders and modules are correctly upper-cased in policies is vital to prevent unintended permissions.[\[1\]](#references)
+
+## Resource Limits
+
+ImageMagick is prone to denial of service attacks if not properly configured. Setting explicit resource limits in the policy is essential to prevent such vulnerabilities.[\[1\]](#references)
+
+## Policy Fragmentation
+
+Policies may be fragmented across different ImageMagick installations, leading to potential conflicts or overrides. It’s recommended to locate and verify the active policy files using commands like:[\[1\]](#references)
+
+```
+$ find / -iname policy.xml
+```
+## A Starter, Restrictive Policy
+
+A restrictive policy template has been proposed, focusing on stringent resource limitations and access controls. This template serves as a baseline for developing tailored policies that align with specific application requirements.[\[1\]](#references)
+
+The effectiveness of a security policy can be confirmed using the `identify -list policy` command in ImageMagick. Additionally, the [evaluator tool](https://imagemagick-secevaluator.doyensec.com/) mentioned earlier can be used to refine the policy based on individual needs.[\[1\]](#references)
+
+For **untrusted uploads**, prefer an **allowlist**.<sup>[\[1\]](#references)</sup> If SVG / EPS / PS are not required, explicitly block the dangerous coders instead of trying to blacklist individual bad payloads:[\[2\]](#references)
+
+```
+<policy domain="coder" rights="none" pattern="{SVG,EPS,PS,MSL}" />
+```
+Additional hardening:
+
+- Disable the Ghostscript delegate in `delegates.xml` if EPS / PS support is not needed.<sup>[\[2\]](#references)</sup>
+- Keep coder names upper-cased because policy patterns are **case sensitive** .<sup>[\[1\]](#references)</sup>
+- Prefer a dedicated SVG rasterizer such as `librsvg` for untrusted SVG instead of full ImageMagick + Ghostscript.<sup>[\[2\]](#references)</sup>
+- Run conversions in a sandbox (`nsjail` ,`firejail` , container, read-only filesystem, restricted tmpdir).<sup>[\[2\]](#references)</sup>
+
+## References
+
+- [1] [ImageMagick Security Policy Evaluator](https://blog.doyensec.com/2023/01/10/imagemagick-security-policy-evaluator.html)
+- [2] [ImagePanick: From SVG to RCE Chaining Weak Policies and Bugs in ImageMagick and Ghostscript](https://blog.deephacking.tech/en/posts/imagepanick-from-svg-to-rce-imagemagick-ghostscript/)
+- [3] [ImagePanick PoC / Docker lab](https://github.com/e1abrador/ImagePanick/)

