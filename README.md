@@ -35,7 +35,7 @@ memiliki izin eksplisit untuk diuji.
 - jawaban dengan sitasi dan fallback extractive saat tidak ada LLM;
 - CLI dan REST API FastAPI;
 - backend eksekusi tool lokal atau Exegol dengan argv aman tanpa shell;
-- 10 profil agent berbasis niche dengan wiring MCP dan tool yang eksplisit;
+- 10 profil agent berbasis niche dengan wiring Exegol dan tool yang eksplisit;
 - provenance berupa judul, heading, path lokal, dan URL asli;
 - provider registry untuk local extractive, OpenAI, Z.ai, DeepSeek, dan OrcaRouter;
 - installer adapter untuk Codex, Claude CLI, dan OpenCode;
@@ -62,6 +62,45 @@ masing-masing dari [`agents/registry.yaml`](agents/registry.yaml):
 MCP inti RedOps hanya **Exegol**. Semua agent memakai tool yang sesuai profil melalui
 container Exegol, dengan knowledge path dan guardrail yang tetap terpisah per niche.
 Lihat [tool matrix](agents/skill-tool-matrix.yaml) dan [MCP setup](docs/MCP-SETUP.md).
+
+### Skills
+
+Skill dipilih berdasarkan task, bukan dipasang ke semua agent:
+
+| Skill | Agent utama | Kegunaan |
+|---|---|---|
+| `mobile-vuln-hunt` | Mobile | Hunt vulnerability Android/iOS dari hasil decompile dan runtime lab |
+| `reverse-engineer` | Reversing, Mobile | Static analysis APK/IPA/native/bundled web |
+| `afl-fuzzing` | Mobile | Greybox fuzzing native Android dengan AFL++ |
+| `flutter-dart-code-review` | Mobile | Review keamanan dan kualitas Flutter/Dart |
+| `browser-vuln-hunting` | Web | Riset vulnerability browser dan PoC terisolasi |
+| `orchestration` | Semua agent | Dispatch, status, dan koordinasi worker |
+
+### MCP
+
+Deployment RedOps yang didukung README ini menggunakan satu MCP inti:
+
+| MCP | Peran |
+|---|---|
+| **Exegol MCP** | Menyediakan environment CLI terisolasi untuk tool agent; command diteruskan sebagai argv tanpa shell |
+
+### CLI tools per agent
+
+| Agent | Required tools | Optional tools |
+|---|---|---|
+| AD | `nmap`, `ldapsearch`, NetExec, Impacket, BloodHound | Kerbrute, Certipy, BloodyAD |
+| Windows Red Team | PowerView, Seatbelt, winPEAS, LOLBAS | Mimikatz |
+| Web | `nmap`, httpx, Burp, XSRFProbe | Nuclei, ffuf, browser tooling |
+| Cloud | `aws`, `az`, `gcloud` | ScoutSuite, Prowler, Pacu |
+| Mobile | ADB, JADX, apktool, Frida, Objection | ios-deploy, class-dump, Ghidra, radare2 |
+| Reversing | Ghidra, radare2, `strings`, `objdump` | rizin, capa, YARA, FLOSS |
+| Network | `nmap`, NetExec, tshark | masscan, Wireshark, Responder |
+| Container/DevOps | Docker, Trivy, kubectl | Helm, kube-bench, Syft, Grype |
+| Web3 | Slither, Mythril, Foundry `cast` | Echidna, Semgrep |
+| RAG Curator | RedOps CLI, Python, Markdown tools | ripgrep, jq, Pandoc |
+
+Tool names are capability requirements; health-check them inside Exegol before use.
+Install only what the approved engagement needs and keep credentials outside the corpus.
 
 ## Installation
 
@@ -168,15 +207,9 @@ vulnerability hunt, konfirmasi Frida/Exegol di lab lokal, dan fuzzing native
 opsional pada emulator offline. Static analysis tidak menjalankan aplikasi target;
 semua pengujian harus memiliki otorisasi tertulis.
 
-Runtime Android bersifat opsional dan memakai server eksternal
-[`uiautomator2-mcp`](docs/MCP-SETUP.md). Exegol MCP tetap tersedia untuk tool dalam
-container terisolasi. Tidak ada dependency MCP atau token yang ditambahkan ke
-instalasi default.
-
-Routing connector opsional Burp, Camoufox, Ghidra, radare2, dan terminal bounded
-untuk mobile tersedia di [`docs/mcp-tools.md`](docs/mcp-tools.md), dengan template
-non-secret [`.mcp.json.example`](.mcp.json.example). BloodHound dicadangkan untuk
-agent AD/identity, bukan mobile. Kebijakan tetap Exegol-first.
+Runtime Android bersifat opsional dan tetap dijalankan melalui Exegol pada emulator/device
+lab yang disposable. Instalasi default tidak menambahkan connector MCP tambahan atau token;
+Exegol adalah satu-satunya MCP yang diperlukan oleh deployment RedOps.
 
 ### MCP Exegol
 
