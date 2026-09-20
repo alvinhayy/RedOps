@@ -7,18 +7,21 @@
     <text x="46" y="163" font-size="68" letter-spacing="-2">PENTEST RAG</text>
   </g>
   <rect x="46" y="178" width="515" height="3" fill="#d91f26"/>
-  <text x="46" y="213" fill="#111111" font-family="Arial, sans-serif" font-size="25" font-weight="700" letter-spacing="2">RETRIEVE • VERIFY • OPERATE</text>
+  <text x="46" y="213" fill="#111111" font-family="Arial, sans-serif" font-size="23" font-weight="700" letter-spacing="1.5">RED TEAM OPERATORS • RAG FRAMEWORK</text>
   <text x="46" y="246" fill="#666666" font-family="Arial, sans-serif" font-size="20">Source-grounded knowledge for authorized security testing</text>
   <g fill="#111111" font-family="monospace" font-size="16">
     <text x="46" y="278">$ redops query "map the attack surface"</text>
     <text x="46" y="302"><tspan fill="#d91f26">[S1]</tspan> knowledge/web/api-methodology.md</text>
   </g>
-  <g transform="translate(952,36)" fill="#111111">
-    <path d="M0 92c0-56 42-92 96-92s96 36 96 92v25H0z"/>
-    <rect y="123" width="192" height="137" rx="26"/>
-    <circle cx="59" cy="51" r="10" fill="#f4f3ef"/>
-    <circle cx="133" cy="51" r="10" fill="#f4f3ef"/>
-    <path d="M45 0 25-31l8-5 22 29zm102-7 22-29 8 5-20 31z"/>
+  <g transform="translate(928,43)" fill="#111111">
+    <rect width="238" height="214" rx="18"/>
+    <rect x="10" y="10" width="218" height="34" rx="10" fill="#d91f26"/>
+    <circle cx="30" cy="27" r="5" fill="#f4f3ef"/>
+    <circle cx="48" cy="27" r="5" fill="#f4f3ef"/>
+    <circle cx="66" cy="27" r="5" fill="#f4f3ef"/>
+    <path d="M38 92 68 117 38 142" fill="none" stroke="#f4f3ef" stroke-width="11" stroke-linecap="square"/>
+    <path d="M86 143h55" fill="none" stroke="#d91f26" stroke-width="11" stroke-linecap="square"/>
+    <text x="26" y="184" fill="#f4f3ef" font-family="monospace" font-size="16">AUTHORIZED / SCOPED</text>
   </g>
   <rect y="306" width="1200" height="34" fill="#111111"/>
   <path d="M0 311h8v8H0zm20 10h8v10h-8zm18-13h8v8h-8zm24 18h8v9h-8zm24-15h8v11h-8zm25 11h8v7h-8zm25-18h8v13h-8zm25 18h8v9h-8zm28-14h8v15h-8zm25 8h8v10h-8zm28-15h8v8h-8zm25 18h8v9h-8zm26-10h8v15h-8zm24-14h8v11h-8zm27 23h8v8h-8zm24-12h8v13h-8zm28 4h8v10h-8zm27-16h8v8h-8zm27 17h8v13h-8zm28-12h8v9h-8zm25 11h8v12h-8zm26-18h8v8h-8zm28 21h8v8h-8zm26-10h8v14h-8zm27-11h8v8h-8zm25 20h8v10h-8zm27-14h8v13h-8zm26 8h8v9h-8zm27-18h8v8h-8zm27 19h8v11h-8zm27-12h8v14h-8zm28 5h8v10h-8zm26-17h8v9h-8zm25 20h8v10h-8zm27-12h8v13h-8zm27 8h8v8h-8zm27-18h8v9h-8zm26 20h8v12h-8zm27-10h8v10h-8zm27 6h8v13h-8zm27-17h8v9h-8zm27 18h8v11h-8zm25-12h8v12h-8zm26 6h8v9h-8zm27-17h8v9h-8zm27 18h8v12h-8zm26-10h8v10h-8zm28 7h8v13h-8zm27-19h8v10h-8zm26 19h8v9h-8zm27-13h8v12h-8zm27 8h8v10h-8zm27-18h8v9h-8zm27 17h8v13h-8zm25-12h8v11h-8zm26 6h8v10h-8zm27-16h8v8h-8zm28 18h8v12h-8zm26-12h8v11h-8zm27 7h8v9h-8zm26-16h8v10h-8zm27 19h8v12h-8zm26-11h8v10h-8zm27 5h8v11h-8zm26-16h8v9h-8zm27 18h8v12h-8zm26-11h8v11h-8zm27 5h8v10h-8zm26-17h8v8h-8zm27 18h8v11h-8zm26-11h8v13h-8zm27 7h8v10h-8z" fill="#d91f26" opacity=".95"/>

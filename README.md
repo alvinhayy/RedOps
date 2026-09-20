@@ -2,7 +2,7 @@
   <img src="assets/banner.svg" alt="RedOps RAG" width="900"><br>
 </h1>
 
-<h4 align="center">Source-grounded pentest knowledge, agent workflows, and safe tool execution in one local-first framework.</h4>
+<h4 align="center">RedOps — Red Team Operators: source-grounded pentest knowledge, agent workflows, and safe tool execution.</h4>
 
 <p align="center">
   <img src="https://img.shields.io/badge/platform-Python%203.11%2B-blue">
@@ -22,9 +22,9 @@
 
 ---
 
-RedOps adalah framework RAG lokal untuk knowledge pentest yang dapat ditelusuri kembali
-ke sumbernya. Gunakan hanya pada sistem yang Anda miliki atau memiliki izin eksplisit
-untuk diuji.
+RedOps (**Red Team Operators**) adalah framework RAG lokal untuk knowledge pentest yang
+dapat ditelusuri kembali ke sumbernya. Gunakan hanya pada sistem yang Anda miliki atau
+memiliki izin eksplisit untuk diuji.
 
 ## Features
 
