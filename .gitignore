@@ -1,5 +1,11 @@
 .env
+.env.*
+!.env.example
 .obsidian/
+.DS_Store
+.idea/
+.vscode/
+*.log
 .pytest_cache/
 .ruff_cache/
 .venv/
@@ -7,5 +13,7 @@ __pycache__/
 *.py[cod]
 data/*.db
 data/*.db-*
+*.sqlite
+*.sqlite3
 dist/
 *.egg-info/
