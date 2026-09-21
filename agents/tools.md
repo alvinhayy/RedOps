@@ -21,7 +21,7 @@ means the workflow may continue with a documented limitation.
 <!-- BEGIN GENERATED AGENT TOOL MATRIX -->
 | Agent | Required tools (registry + owned skills) | Optional tools (registry + owned skills) |
 |---|---|---|
-| `ad_agent` | `bloodhound`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
+| `ad_agent` | `bloodhound-python`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
 | `windows_redteam_agent` | `lolbas`, `powerview`, `seatbelt`, `winpeas` | `mimikatz` |
 | `web_agent` | `burp`, `httpx`, `nmap` | `camoufox`, `ffuf`, `nuclei`, `xsrfprobe` |
 | `cloud_agent` | `aws`, `az`, `gcloud` | `pacu`, `prowler`, `scoutsuite` |
@@ -37,9 +37,9 @@ means the workflow may continue with a documented limitation.
 
 ### `ad_agent`
 
-- Required: `nmap`, `ldapsearch`, NetExec, Impacket, BloodHound.
+- Required: `nmap`, `ldapsearch`, NetExec, Impacket, `bloodhound-python`.
 - Optional: Kerbrute, Certipy, BloodyAD.
-- Source/checks: Exegol (`command -v nmap ldapsearch netexec`; `python -c 'import impacket'`); BloodHound MCP health/capabilities.
+- Source/checks: Exegol (`command -v nmap ldapsearch netexec bloodhound-python`; `python -c 'import impacket'`).
 - Fallback: offline LDAP/BloodHound export analysis. BloodHound data stays in the authorized AD scope.
 
 ### `windows_redteam_agent`
@@ -110,7 +110,7 @@ means the workflow may continue with a documented limitation.
 
 ## MCP boundary summary
 
-- BloodHound: `ad_agent` only.
+- BloodHound Python (`bloodhound-python`): `ad_agent` only; graph UI/MCP is not required.
 - Burp: web, mobile, and web3 profiles, each with separate traffic scope.
 - Camoufox: web profile only.
 - uiautomator2: mobile profile only.

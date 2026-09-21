@@ -3,7 +3,7 @@ description: Generated union of registry and skill tooling
 agents:
   ad_agent:
     required:
-    - bloodhound
+    - bloodhound-python
     - impacket
     - ldapsearch
     - netexec

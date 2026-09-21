@@ -9,7 +9,6 @@ not installed or started automatically.
 | `burp` | Authorized HTTP(S) proxy/intercept | Only in-scope traffic |
 | `camoufox` | Scoped browser automation | Only approved flows |
 | `uiautomator2` | Android UI/device automation | Disposable authorized device |
-| `bloodhound-ad-only` | AD graph/relation queries | AD/identity agent only; authorized domain/lab |
 | `ghidra` | Structured project/import/decompile/analysis | Local authorized files; never execute targets |
 | `radare2` | Disassembly, strings, symbols, xrefs, scripting | Isolated local binaries; never execute targets |
 | `terminal-bounded` | Local helper commands | Explicit approval, allowlisted argv, workspace-only |
@@ -23,9 +22,9 @@ credential/domain metadata.
 1. Prefer Exegol for tools and analysis whenever the image provides them.
 2. Burp is only for proxying/intercepting explicitly authorized traffic.
 3. Camoufox is only for an approved browser flow; keep headless mode enabled.
-4. BloodHound is only for the AD/identity agent and an authorized AD graph; it is
-   not a mobile connector. Graph queries can expose sensitive identities, group
-   membership, sessions, and credential metadata.
+4. BloodHound collection uses `bloodhound-python` only for the AD/identity agent and
+   an authorized AD graph; it is not a mobile connector or MCP requirement. Graph
+   data can expose sensitive identities, group membership, sessions, and credential metadata.
 5. Ghidra and radare2 receive local, authorized files only. Static analysis must
    not launch an app or execute a target binary.
 6. Terminal MCP is not a host shell: enforce argv-only commands, an explicit
@@ -38,7 +37,7 @@ credential/domain metadata.
 redops exegol status
 adb devices -l
 curl --fail --silent http://127.0.0.1:1337/v0.1/health || true  # Burp, if supported
-curl --fail --silent http://127.0.0.1:8080/api/v1/status || true  # BloodHound, if supported
+command -v bloodhound-python || true  # AD agent collector, preferably inside Exegol
 command -v r2
 test -d "$GHIDRA_PROJECT_DIR"
 ```
@@ -54,9 +53,6 @@ and analysis workspace before opening a file.
 export BURP_API_URL=http://127.0.0.1:1337
 export BURP_API_TOKEN='<secret-manager-injection>'
 export CAMOUFOX_HEADLESS=true
-export BLOODHOUND_URL=http://127.0.0.1:8080
-export NEO4J_URI=bolt://127.0.0.1:7687
-export BLOODHOUND_TOKEN='<secret-manager-injection>'
 export GHIDRA_PROJECT_DIR="$PWD/engagements/current/ghidra"
 export R2_WORKSPACE="$PWD/engagements/current/static"
 export TERMINAL_MCP_WORKSPACE="$PWD/engagements/current"

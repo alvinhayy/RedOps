@@ -3,17 +3,17 @@ name: ad_agent
 description: Active Directory, Entra ID/Azure AD, identity attack paths, and BloodHound.
 knowledge_paths: [knowledge/ad, knowledge/windows, knowledge/database, knowledge/methodology, knowledge/tools]
 skills: [RAG retrieval, AD reconnaissance, ACL/delegation analysis]
-required_tools: [nmap, ldapsearch, netexec, impacket, bloodhound]
+required_tools: [nmap, ldapsearch, netexec, impacket, bloodhound-python]
 optional_tools: [kerbrute, certipy, bloodyad]
-allowed_mcp: [redops-exegol, bloodhound-ad-only, terminal-bounded]
+allowed_mcp: [redops-exegol, terminal-bounded]
 ---
 
 # AD agent
 
 ## Health checks
 
-Run `command -v nmap ldapsearch netexec`, verify Impacket with `python -c 'import impacket'`,
-and call BloodHound MCP `health/capabilities` before importing or querying graph data.
+Run `command -v nmap ldapsearch netexec bloodhound-python`, and verify Impacket with
+`python -c 'import impacket'` before collecting authorized AD graph data.
 
 ## Input/output
 

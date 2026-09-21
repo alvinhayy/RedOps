@@ -20,11 +20,6 @@
       "args": ["/absolute/path/terminal-mcp/server.py"],
       "env": {"TERMINAL_MCP_WORKSPACE": "/absolute/path/engagements/current", "TERMINAL_MCP_ALLOWED_COMMANDS": "adb,frida,jadx,apktool,pytest,redops"}
     },
-    "bloodhound-ad-only": {
-      "command": "/absolute/path/bloodhound-mcp/.venv/bin/python",
-      "args": ["/absolute/path/bloodhound-mcp/server.py"],
-      "env": {"BLOODHOUND_URL": "http://127.0.0.1:8080", "NEO4J_URI": "bolt://127.0.0.1:7687", "BLOODHOUND_TOKEN": "${BLOODHOUND_TOKEN}"}
-    },
     "ghidra": {
       "command": "/absolute/path/ghidra-mcp/.venv/bin/python",
       "args": ["/absolute/path/ghidra-mcp/server.py"],

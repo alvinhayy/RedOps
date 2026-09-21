@@ -21,10 +21,10 @@ agents:
       - tools
     inputs: domain scope, approved credentials/fixtures, BloodHound or LDAP exports, host evidence
     outputs: recon inventory, identity/ACL/delegation findings, attack-path graph summary, remediation
-    allowed_mcp: [redops-exegol, bloodhound, terminal-bounded]
+    allowed_mcp: [redops-exegol, terminal-bounded]
     mcp_profile: ad
     tooling:
-      required: [nmap, ldapsearch, netexec, impacket, bloodhound]
+      required: [nmap, ldapsearch, netexec, impacket, bloodhound-python]
       optional: [kerbrute, certipy, bloodyad]
     fallback: read-only RAG retrieval; Exegol tools before bounded terminal
     guardrails:

@@ -92,7 +92,7 @@ optional tools milik skill selalu ikut ke agent pemiliknya:
 <!-- BEGIN GENERATED AGENT TOOLS -->
 | Agent | Required tools (registry + owned skills) | Optional tools (registry + owned skills) |
 |---|---|---|
-| `ad_agent` | `bloodhound`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
+| `ad_agent` | `bloodhound-python`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
 | `windows_redteam_agent` | `lolbas`, `powerview`, `seatbelt`, `winpeas` | `mimikatz` |
 | `web_agent` | `burp`, `httpx`, `nmap` | `camoufox`, `ffuf`, `nuclei`, `xsrfprobe` |
 | `cloud_agent` | `aws`, `az`, `gcloud` | `pacu`, `prowler`, `scoutsuite` |
@@ -128,8 +128,11 @@ Installer menyimpan checkout di `~/.local/share/redops` dan CLI/launcher di
 `~/.local/bin`. Selain RedOps, adapter `redops-rag` dipasang ke Codex, Claude CLI,
 dan OpenCode secara idempoten; `claude-zai` mengambil key dari konfigurasi OpenCode
 tanpa mengubah login OAuth Claude. Override dengan `REDOPS_INSTALL_ROOT`,
-`REDOPS_BIN_DIR`, atau `REDOPS_REF`; installer tidak menghapus data dan tidak melakukan
-`git reset --hard`.
+`REDOPS_BIN_DIR`, `REDOPS_RUNTIME_DIR`, atau `REDOPS_REF`. Installer juga menulis
+manifest tools dan konfigurasi MCP Exegol non-secret ke `~/.config/redops/`. Tool
+assessment seperti `bloodhound-python` dijalankan di image Exegol/lingkungan yang
+disetujui; installer tidak memasang tool ofensif ke host secara diam-diam. Installer
+tidak menghapus data dan tidak melakukan `git reset --hard`.
 
 Manual dengan pipx:
 

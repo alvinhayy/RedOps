@@ -5,6 +5,7 @@ REPO_URL="${REDOPS_REPO_URL:-https://github.com/alvinhayy/RedOps.git}"
 REF="${REDOPS_REF:-master}"
 INSTALL_ROOT="${REDOPS_INSTALL_ROOT:-${HOME}/.local/share/redops}"
 BIN_DIR="${REDOPS_BIN_DIR:-${HOME}/.local/bin}"
+RUNTIME_DIR="${REDOPS_RUNTIME_DIR:-${HOME}/.config/redops}"
 
 die() { printf 'redops install: %s\n' "$*" >&2; exit 1; }
 command -v python3 >/dev/null 2>&1 || die "python3 is required (3.11+)."
@@ -32,10 +33,27 @@ ln -sfn "$INSTALL_ROOT/.venv/bin/redops" "$BIN_DIR/redops"
 ln -sfn "$INSTALL_ROOT/scripts/claude-zai" "$BIN_DIR/claude-zai"
 ln -sfn "$INSTALL_ROOT/scripts/redops-zai" "$BIN_DIR/redops-zai"
 
+# Publish generated, non-secret tool/MCP manifests for agents and CLI clients.
+mkdir -p "$RUNTIME_DIR"
+cp "$INSTALL_ROOT/agents/agent-tools.generated.yaml" "$RUNTIME_DIR/agent-tools.yaml"
+cp "$INSTALL_ROOT/agents/mcp-profiles.yaml" "$RUNTIME_DIR/mcp-profiles.yaml"
+cat > "$RUNTIME_DIR/mcp.json" <<EOF
+{
+  "mcpServers": {
+    "redops-exegol": {
+      "command": "$BIN_DIR/redops",
+      "args": ["exegol-mcp"]
+    }
+  }
+}
+EOF
+
 printf 'RedOps installed at %s\n' "$INSTALL_ROOT"
 printf 'CLI: %s/redops\n' "$BIN_DIR"
 printf 'Claude Z.ai launcher: %s/claude-zai\n' "$BIN_DIR"
 printf 'RAG adapters: Codex, Claude CLI, and OpenCode\n'
+printf 'Tool manifest: %s/agent-tools.yaml\n' "$RUNTIME_DIR"
+printf 'MCP profile/config: %s/mcp-profiles.yaml and %s/mcp.json\n' "$RUNTIME_DIR" "$RUNTIME_DIR"
 if [[ ":${PATH}:" != *":${BIN_DIR}:"* ]]; then
   printf 'Add to PATH: export PATH="%s:$PATH"\n' "$BIN_DIR"
 fi

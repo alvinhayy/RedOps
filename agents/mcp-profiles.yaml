@@ -1,6 +1,6 @@
 version: 1
 profiles:
-  ad_agent: [redops-exegol, bloodhound-ad-only, terminal-bounded]
+  ad_agent: [redops-exegol, terminal-bounded]
   windows_redteam_agent: [redops-exegol, terminal-bounded]
   web_agent: [redops-exegol, burp, camoufox, terminal-bounded]
   cloud_agent: [redops-exegol, terminal-bounded]
