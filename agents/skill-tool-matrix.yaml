@@ -17,7 +17,7 @@ skills:
       required: [rg, adb]
       optional: [semgrep, jadx, apktool, frida, drozer, otool, nm, strings, plutil, class-dump]
     mcp:
-      required: []
+      required: [redops-rag]
       optional: [redops-exegol, uiautomator2, burp]
     health_checks:
       - "command -v rg adb"
@@ -39,7 +39,7 @@ skills:
       required: [file, strings, find, unzip]
       optional: [apktool, jadx, dex2jar, baksmali, androguard, otool, plutil, class-dump, codesign, node, npx, trufflehog, gitleaks, docker]
     mcp:
-      required: []
+      required: [redops-rag]
       optional: [redops-exegol, ghidra, radare2, terminal-bounded]
     health_checks:
       - "command -v file strings find unzip"
@@ -61,7 +61,7 @@ skills:
       required: [adb]
       optional: [afl-fuzz, clang, llvm-objdump, ndk-build, timeout, make]
     mcp:
-      required: []
+      required: [redops-rag]
       optional: [redops-exegol, terminal-bounded, radare2]
     health_checks:
       - "command -v adb"

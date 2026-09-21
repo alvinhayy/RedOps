@@ -109,6 +109,10 @@ cp "$INSTALL_ROOT/agents/mcp-profiles.yaml" "$RUNTIME_DIR/mcp-profiles.yaml"
 cat > "$RUNTIME_DIR/mcp.json" <<EOF
 {
   "mcpServers": {
+    "redops-rag": {
+      "command": "$BIN_DIR/redops",
+      "args": ["rag-mcp"]
+    },
     "redops-exegol": {
       "command": "$BIN_DIR/redops",
       "args": ["exegol-mcp"]

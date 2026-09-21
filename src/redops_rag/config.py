@@ -31,6 +31,7 @@ def _env_bool(name: str, default: bool) -> bool:
 class Settings:
     db_path: Path = Path("data/redops.db")
     knowledge_dir: Path = Path("knowledge")
+    writeups_dir: Path = Path("writeups")
     embedding_provider: str = "hash"
     embedding_model: str = "redops-hash-v1"
     embedding_dimension: int = 384
@@ -74,6 +75,7 @@ class Settings:
         return cls(
             db_path=Path(os.getenv("REDOPS_DB_PATH", "data/redops.db")),
             knowledge_dir=Path(os.getenv("REDOPS_KNOWLEDGE_DIR", "knowledge")),
+            writeups_dir=Path(os.getenv("REDOPS_WRITEUPS_DIR", "writeups")),
             embedding_provider=os.getenv("REDOPS_EMBEDDING_PROVIDER", "hash"),
             embedding_model=os.getenv("REDOPS_EMBEDDING_MODEL", "redops-hash-v1"),
             embedding_dimension=_env_int("REDOPS_EMBEDDING_DIMENSION", 384),

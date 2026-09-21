@@ -140,15 +140,27 @@ class IndexStore:
                 db.execute("DELETE FROM documents WHERE path=?", (path,))
         return len(missing)
 
-    def search(self, query: str, query_vector: list[float], limit: int, vector_weight: float) -> list[SearchResult]:
+    def search(
+        self,
+        query: str,
+        query_vector: list[float],
+        limit: int,
+        vector_weight: float,
+        corpus: str | None = None,
+    ) -> list[SearchResult]:
         if not 0 <= vector_weight <= 1:
             raise ValueError("vector_weight must be between zero and one")
         with self.connect() as db:
-            rows = db.execute(
+            all_rows = db.execute(
                 """SELECT c.id, c.heading, c.content, c.embedding_json,
-                          d.title, d.source_url, d.path
+                          d.title, d.source_url, d.path, d.metadata_json
                    FROM chunks c JOIN documents d ON d.id=c.document_id"""
             ).fetchall()
+            rows = [
+                row
+                for row in all_rows
+                if corpus is None or json.loads(row["metadata_json"]).get("corpus", "knowledge") == corpus
+            ]
             vector_ranked = sorted(
                 rows,
                 key=lambda row: _cosine(query_vector, json.loads(row["embedding_json"])),
@@ -169,6 +181,8 @@ class IndexStore:
             scores[row["id"]] = scores.get(row["id"], 0.0) + vector_weight / (60 + rank)
         for rank, row in enumerate(lexical_rows, start=1):
             chunk_id = row["chunk_id"]
+            if chunk_id not in row_by_id:
+                continue
             scores[chunk_id] = scores.get(chunk_id, 0.0) + (1 - vector_weight) / (60 + rank)
 
         ranked = sorted(scores, key=scores.get, reverse=True)[:limit]
@@ -181,20 +195,27 @@ class IndexStore:
                 heading=row_by_id[chunk_id]["heading"],
                 content=row_by_id[chunk_id]["content"],
                 score=scores[chunk_id],
+                corpus=json.loads(row_by_id[chunk_id]["metadata_json"]).get("corpus", "knowledge"),
             )
             for chunk_id in ranked
         ]
 
-    def stats(self) -> dict[str, int | str | None]:
+    def stats(self) -> dict[str, object]:
         with self.connect() as db:
             documents = db.execute("SELECT COUNT(*) AS count FROM documents").fetchone()["count"]
             chunks = db.execute("SELECT COUNT(*) AS count FROM chunks").fetchone()["count"]
+            corpus_rows = db.execute("SELECT metadata_json FROM documents").fetchall()
             fingerprint = db.execute(
                 "SELECT value FROM metadata WHERE key='embedding_fingerprint'"
             ).fetchone()
+        by_corpus: dict[str, int] = {}
+        for row in corpus_rows:
+            corpus = json.loads(row["metadata_json"]).get("corpus", "knowledge")
+            by_corpus[corpus] = by_corpus.get(corpus, 0) + 1
         return {
             "documents": documents,
             "chunks": chunks,
+            "documents_by_corpus": by_corpus,
             "embedding_fingerprint": fingerprint["value"] if fingerprint else None,
         }
 

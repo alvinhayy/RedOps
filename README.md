@@ -29,11 +29,13 @@ memiliki izin eksplisit untuk diuji.
 ## Features
 
 - ingestion Markdown yang idempotent dan heading-aware;
+- dual-corpus RAG untuk teknik/metodologi (`knowledge/`) dan writeup (`writeups/`);
 - hybrid retrieval: SQLite FTS5 + cosine vector dengan reciprocal-rank fusion;
 - embedding hashing lokal tanpa API sebagai konfigurasi awal;
 - adaptor embedding dan chat API yang kompatibel dengan OpenAI;
 - jawaban dengan sitasi dan fallback extractive saat tidak ada LLM;
 - CLI dan REST API FastAPI;
+- MCP RAG read-only (`redops rag-mcp`) untuk pencarian knowledge/writeup;
 - backend eksekusi tool lokal atau Exegol dengan argv aman tanpa shell;
 - 10 profil agent berbasis niche dengan wiring Exegol dan tool yang eksplisit;
 - provenance berupa judul, heading, path lokal, dan URL asli;
@@ -174,6 +176,9 @@ cp .env.example .env
 redops ingest
 redops stats
 redops query "Bagaimana melakukan enumerasi Active Directory?"
+# Batasi retrieval ke corpus tertentu
+redops query "jalur privilege escalation Linux" --corpus knowledge
+redops query "kasus serupa" --corpus writeups
 ```
 
 Lihat status runtime tanpa menampilkan secret, atau gunakan shell interaktif:
@@ -272,7 +277,7 @@ Adapter hanya menyediakan `exegol_status` dan `exegol_exec` (command wajib berup
 list argv, tanpa shell). Contoh konfigurasi klien:
 
 ```json
-{"mcpServers":{"redops-exegol":{"command":"redops","args":["exegol-mcp"]}}}
+{"mcpServers":{"redops-rag":{"command":"redops","args":["rag-mcp"]},"redops-exegol":{"command":"redops","args":["exegol-mcp"]}}}
 ```
 
 ## Model Providers

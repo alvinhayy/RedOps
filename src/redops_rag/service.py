@@ -53,7 +53,9 @@ class RagService:
     def ingest(self, force: bool = False) -> dict[str, int]:
         return Ingestor(self.settings, self.store, self.embedder).run(force=force)
 
-    def retrieve(self, question: str, top_k: int | None = None):
+    def retrieve(self, question: str, top_k: int | None = None, corpus: str | None = None):
+        if corpus is not None and corpus not in {"knowledge", "writeups"}:
+            raise ValueError("corpus must be knowledge or writeups")
         requested_limit = top_k if top_k is not None else self.settings.top_k
         if not 1 <= requested_limit <= 100:
             raise ValueError("top_k must be between 1 and 100")
@@ -66,10 +68,17 @@ class RagService:
             vector,
             requested_limit,
             self.settings.vector_weight,
+            corpus=corpus,
         )
 
-    def query(self, question: str, top_k: int | None = None, generate: bool = True) -> dict:
-        sources = self.retrieve(question, top_k)
+    def query(
+        self,
+        question: str,
+        top_k: int | None = None,
+        generate: bool = True,
+        corpus: str | None = None,
+    ) -> dict:
+        sources = self.retrieve(question, top_k, corpus=corpus)
         answer = self.generator.generate(question, sources) if generate else None
         return {
             "question": question,

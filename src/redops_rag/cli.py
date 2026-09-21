@@ -55,6 +55,7 @@ def build_parser() -> argparse.ArgumentParser:
     query_parser.add_argument("question")
     query_parser.add_argument("--top-k", type=int)
     query_parser.add_argument("--no-generate", action="store_true")
+    query_parser.add_argument("--corpus", choices=("knowledge", "writeups"))
 
     interactive_parser = subparsers.add_parser(
         "interactive", aliases=["shell"], help="open an interactive RAG query shell"
@@ -73,6 +74,7 @@ def build_parser() -> argparse.ArgumentParser:
     exec_parser = exegol_subparsers.add_parser("exec", help="execute an argv command")
     exec_parser.add_argument("exec_args", nargs=argparse.REMAINDER)
     subparsers.add_parser("exegol-mcp", help="run the optional Exegol MCP stdio adapter")
+    subparsers.add_parser("rag-mcp", help="run the read-only dual-corpus RAG MCP adapter")
     waf_parser = subparsers.add_parser("waf", help="bounded WAF timing benchmark")
     waf_sub = waf_parser.add_subparsers(dest="waf_command", required=True)
     bench = waf_sub.add_parser("benchmark", help="measure baseline/test timing")
@@ -136,6 +138,11 @@ def main() -> None:
 
         serve_stdio()
         return
+    if args.command == "rag-mcp":
+        from .rag_mcp import serve_stdio
+
+        serve_stdio()
+        return
     if args.command == "exegol":
         try:
             runner = CommandRunner()
@@ -172,7 +179,7 @@ def main() -> None:
     if args.command == "ingest":
         result = service.ingest(force=args.force)
     elif args.command == "query":
-        result = service.query(args.question, args.top_k, not args.no_generate)
+        result = service.query(args.question, args.top_k, not args.no_generate, corpus=args.corpus)
     elif args.command == "stats":
         result = service.store.stats()
     else:

@@ -1,5 +1,6 @@
 {
   "mcpServers": {
+    "redops-rag": {"command": "redops", "args": ["rag-mcp"]},
     "redops-exegol": {"command": "redops", "args": ["exegol-mcp"]},
     "uiautomator2": {
       "command": "/absolute/path/uiautomator2-mcp/.venv/bin/python",

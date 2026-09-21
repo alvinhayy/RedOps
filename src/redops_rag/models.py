@@ -30,6 +30,7 @@ class SearchResult:
     heading: str
     content: str
     score: float
+    corpus: str = "knowledge"
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -40,5 +41,5 @@ class SearchResult:
             "heading": self.heading,
             "content": self.content,
             "score": round(self.score, 6),
+            "corpus": self.corpus,
         }
-

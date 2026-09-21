@@ -40,6 +40,10 @@ Use absolute paths and never put tokens in this JSON:
 ```json
 {
   "mcpServers": {
+    "redops-rag": {
+      "command": "redops",
+      "args": ["rag-mcp"]
+    },
     "redops-exegol": {
       "command": "redops",
       "args": ["exegol-mcp"]

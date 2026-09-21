@@ -7,6 +7,7 @@ defaults:
   authorization: written authorization and an in-scope target/engagement are required
   execution_order: [exegol, approved_mcp, terminal-bounded]
   corpus_root: knowledge
+  writeups_root: writeups
   outputs: [markdown, json]
   provenance: preserve source_url, document_path, and evidence references
   secret_policy: credentials, tokens, cookies, keys, and domain exports stay outside the shared corpus
@@ -21,7 +22,7 @@ agents:
       - tools
     inputs: domain scope, approved credentials/fixtures, BloodHound or LDAP exports, host evidence
     outputs: recon inventory, identity/ACL/delegation findings, attack-path graph summary, remediation
-    allowed_mcp: [redops-exegol, terminal-bounded]
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
     mcp_profile: ad
     tooling:
       required: [nmap, ldapsearch, netexec, impacket, bloodhound-python]
@@ -35,7 +36,7 @@ agents:
     knowledge: [windows, redteam, tools, vulnerabilities, ad, methodology]
     inputs: authorized Windows host, shell output, service/task/ACL evidence, target binary metadata
     outputs: attack-surface inventory, reproducible findings, detection/mitigation notes
-    allowed_mcp: [redops-exegol, terminal-bounded, camoufox]
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded, camoufox]
     mcp_profile: windows-redteam
     tooling:
       required: [powerview, seatbelt, winpeas, lolbas]
@@ -49,7 +50,7 @@ agents:
     knowledge: [web, vulnerabilities, network, methodology, tools, redteam]
     inputs: in-scope URLs/API specifications, test accounts, proxy captures, application artifacts
     outputs: endpoint map, vulnerability evidence, request/response reproduction, remediation
-    allowed_mcp: [redops-exegol, burp, camoufox, terminal-bounded]
+    allowed_mcp: [redops-rag, redops-exegol, burp, camoufox, terminal-bounded]
     mcp_profile: web
     tooling:
       required: [nmap, httpx, burp]
@@ -63,7 +64,7 @@ agents:
     knowledge: [cloud, ad, container, devops, network, vulnerabilities, methodology, tools]
     inputs: authorized cloud account/project, IAM policy exports, IaC, logs, resource inventory
     outputs: IAM/resource graph, misconfiguration findings, least-privilege remediation
-    allowed_mcp: [redops-exegol, terminal-bounded]
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
     mcp_profile: cloud
     tooling:
       required: [aws, az, gcloud]
@@ -77,7 +78,7 @@ agents:
     knowledge: [mobile, reversing, vulnerabilities, web, network, tools, methodology]
     inputs: authorized APK/AAB/IPA, emulator/device fixture, test account, app traffic and native libraries
     outputs: static attack-surface map, runtime evidence, vulnerability report, remediation
-    allowed_mcp: [redops-exegol, burp, uiautomator2, ghidra, radare2, terminal-bounded]
+    allowed_mcp: [redops-rag, redops-exegol, burp, uiautomator2, ghidra, radare2, terminal-bounded]
     mcp_profile: mobile
     tooling:
       required: [adb, jadx, apktool, frida, objection]
@@ -92,7 +93,7 @@ agents:
     knowledge: [reversing, malware, tools, vulnerabilities, windows, linux, mobile, methodology]
     inputs: authorized binaries, APK/IPA/native libraries, hashes, symbols, sandbox artifacts
     outputs: strings/symbols/xrefs, decompilation notes, behavior hypotheses, IOC and remediation report
-    allowed_mcp: [redops-exegol, ghidra, radare2, terminal-bounded]
+    allowed_mcp: [redops-rag, redops-exegol, ghidra, radare2, terminal-bounded]
     mcp_profile: reversing
     tooling:
       required: [ghidra, radare2, strings, objdump]
@@ -106,7 +107,7 @@ agents:
     knowledge: [network, wireless, linux, windows, web, vulnerabilities, tools, methodology]
     inputs: authorized CIDR/host list, packet captures, service banners, VPN/lab parameters
     outputs: asset/service inventory, protocol findings, segmentation evidence, remediation
-    allowed_mcp: [redops-exegol, terminal-bounded]
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
     mcp_profile: network
     tooling:
       required: [nmap, netexec, tshark]
@@ -120,7 +121,7 @@ agents:
     knowledge: [container, devops, cloud, linux, vulnerabilities, tools, methodology]
     inputs: authorized image, manifest, cluster/IaC export, pipeline configuration, registry metadata
     outputs: image/config findings, workload identity risks, pipeline and remediation report
-    allowed_mcp: [redops-exegol, terminal-bounded]
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
     mcp_profile: container-devops
     tooling:
       required: [docker, trivy, kubectl]
@@ -134,7 +135,7 @@ agents:
     knowledge: [web3, web, vulnerabilities, reversing, network, tools, methodology]
     inputs: authorized contract source/bytecode, ABI, testnet wallet, DApp build, RPC scope
     outputs: contract/transaction attack surface, finding evidence, invariant and remediation notes
-    allowed_mcp: [redops-exegol, burp, ghidra, radare2, terminal-bounded]
+    allowed_mcp: [redops-rag, redops-exegol, burp, ghidra, radare2, terminal-bounded]
     mcp_profile: web3
     tooling:
       required: [slither, mythril, cast]
@@ -148,7 +149,7 @@ agents:
     knowledge: [ad, cloud, container, database, devops, linux, malware, methodology, misc, mobile, network, redteam, reversing, tools, vulnerabilities, web, web3, windows, wireless]
     inputs: source URLs/files, existing Markdown corpus, manifest, retrieval test questions
     outputs: cleaned Markdown, manifest/provenance updates, category audit, index and QA report
-    allowed_mcp: [terminal-bounded]
+    allowed_mcp: [redops-rag, terminal-bounded]
     mcp_profile: rag-curator
     tooling:
       required: [redops, python, markdown-tools]

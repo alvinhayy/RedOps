@@ -8,6 +8,7 @@ def settings(tmp_path: Path) -> Settings:
     return Settings(
         db_path=tmp_path / "index.db",
         knowledge_dir=tmp_path / "knowledge",
+        writeups_dir=tmp_path / "writeups",
         chunk_size=300,
         chunk_overlap=20,
     )
@@ -105,3 +106,22 @@ def test_identical_documents_do_not_collide(tmp_path: Path) -> None:
     report = service.ingest()
     assert report["indexed"] == 2
     assert service.store.stats()["documents"] == 2
+
+
+def test_knowledge_and_writeups_are_separate_corpora(tmp_path: Path) -> None:
+    config = settings(tmp_path)
+    config.knowledge_dir.mkdir()
+    config.writeups_dir.mkdir()
+    (config.knowledge_dir / "method.md").write_text(
+        "# Method\n\nLDAP enumeration methodology.", encoding="utf-8"
+    )
+    (config.writeups_dir / "case.md").write_text(
+        "# Case\n\nA solved LDAP enumeration writeup.", encoding="utf-8"
+    )
+    service = RagService(config)
+
+    report = service.ingest()
+    assert report["indexed"] == 2
+    assert service.query("LDAP enumeration", generate=False, corpus="knowledge")["sources"][0]["corpus"] == "knowledge"
+    assert service.query("LDAP enumeration", generate=False, corpus="writeups")["sources"][0]["corpus"] == "writeups"
+    assert service.store.stats()["documents_by_corpus"] == {"knowledge": 1, "writeups": 1}

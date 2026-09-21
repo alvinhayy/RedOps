@@ -27,7 +27,7 @@ def _parse_front_matter(content: str) -> tuple[dict[str, str], str]:
     return metadata, content[match.end() :]
 
 
-def load_document(path: Path, root: Path) -> Document:
+def load_document(path: Path, root: Path, corpus: str = "knowledge") -> Document:
     raw = path.read_text(encoding="utf-8")
     metadata, body = _parse_front_matter(raw)
     title_match = TITLE_RE.search(body)
@@ -38,7 +38,8 @@ def load_document(path: Path, root: Path) -> Document:
         or metadata.get("url")
         or path.resolve().as_uri()
     )
-    relative = path.relative_to(root).as_posix()
+    relative = f"{corpus}/{path.relative_to(root).as_posix()}"
+    metadata.setdefault("corpus", corpus)
     return Document(
         path=relative,
         title=title,
@@ -56,9 +57,11 @@ class Ingestor:
         self.embedder = embedder
 
     def run(self, source_dir: Path | None = None, force: bool = False) -> dict[str, int]:
-        root = (source_dir or self.settings.knowledge_dir).resolve()
-        if not root.is_dir():
-            raise FileNotFoundError(f"knowledge directory does not exist: {root}")
+        roots: list[tuple[str, Path]] = [("knowledge", (source_dir or self.settings.knowledge_dir).resolve())]
+        if source_dir is None and self.settings.writeups_dir.resolve().is_dir():
+            roots.append(("writeups", self.settings.writeups_dir.resolve()))
+        if not roots[0][1].is_dir():
+            raise FileNotFoundError(f"knowledge directory does not exist: {roots[0][1]}")
 
         existing_fingerprint = self.store.get_metadata("embedding_fingerprint")
         fingerprint = self.settings.embedding_fingerprint
@@ -67,33 +70,36 @@ class Ingestor:
                 "embedding configuration changed; run ingest with --force to rebuild the index"
             )
 
-        files = sorted(path for path in root.rglob("*.md") if path.is_file())
         active_paths: set[str] = set()
         indexed = skipped = empty = 0
-        for path in files:
-            document = load_document(path, root)
-            if not document.content.strip():
-                empty += 1
-                continue
-            active_paths.add(document.path)
-            if not force and self.store.document_hash(document.path) == document.content_hash:
-                skipped += 1
-                continue
-            chunks = chunk_markdown(
-                document.content,
-                max_chars=self.settings.chunk_size,
-                overlap=self.settings.chunk_overlap,
-            )
-            embeddings = self.embedder.embed(
-                [f"{chunk.heading}\n{chunk.content}" for chunk in chunks]
-            )
-            self.store.upsert_document(document, chunks, embeddings)
-            indexed += 1
+        discovered = 0
+        for corpus, root in roots:
+            files = sorted(path for path in root.rglob("*.md") if path.is_file())
+            discovered += len(files)
+            for path in files:
+                document = load_document(path, root, corpus)
+                if not document.content.strip():
+                    empty += 1
+                    continue
+                active_paths.add(document.path)
+                if not force and self.store.document_hash(document.path) == document.content_hash:
+                    skipped += 1
+                    continue
+                chunks = chunk_markdown(
+                    document.content,
+                    max_chars=self.settings.chunk_size,
+                    overlap=self.settings.chunk_overlap,
+                )
+                embeddings = self.embedder.embed(
+                    [f"{chunk.heading}\n{chunk.content}" for chunk in chunks]
+                )
+                self.store.upsert_document(document, chunks, embeddings)
+                indexed += 1
 
         removed = self.store.delete_missing(active_paths)
         self.store.set_metadata("embedding_fingerprint", fingerprint)
         return {
-            "discovered": len(files),
+            "discovered": discovered,
             "indexed": indexed,
             "skipped": skipped,
             "empty": empty,
