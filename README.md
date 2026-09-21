@@ -111,9 +111,12 @@ python scripts/sync_agent_tools.py
 python scripts/sync_agent_tools.py --check
 ```
 
-Skill yang memiliki deklarasi `slash_commands` juga dipasang otomatis oleh
-`redops install-cli claude` dan `redops install-cli opencode`. File command yang
-sudah ada tidak ditimpa kecuali memakai `--force`.
+Slash command skill juga ditemukan otomatis oleh `redops install-cli claude` dan
+`redops install-cli opencode`: setiap file Markdown di `commands/` (termasuk
+`.agents/commands/` pada repository skill) disalin apa adanya. RedOps memindai
+skill di direktori kerja, `~/.agents`, dan `~/.codex`; tambahkan lokasi lain dengan
+`--skill-path` atau `REDOPS_SKILL_PATHS` (dipisahkan `:` di macOS/Linux). File
+command yang sudah ada tidak ditimpa kecuali memakai `--force`.
 
 Tool names are capability requirements; health-check them inside Exegol before use.
 Install only what the approved engagement needs and keep credentials outside the corpus.
@@ -196,6 +199,8 @@ redops install-cli all --dry-run
 redops install-cli codex
 redops install-cli claude
 redops install-cli opencode
+# Jalankan dari checkout skill, atau tunjukkan root skill secara eksplisit
+redops install-cli all --skill-path /path/to/Mobile-ReverseSkill
 ```
 
 Target default adalah `~/.codex`, `~/.claude`, dan `~/.config/opencode`. Override path

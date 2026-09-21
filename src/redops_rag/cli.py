@@ -22,6 +22,12 @@ def build_parser() -> argparse.ArgumentParser:
     install_parser.add_argument("target", choices=("codex", "claude", "opencode", "all"))
     install_parser.add_argument("--dry-run", action="store_true", help="show paths without writing")
     install_parser.add_argument("--force", action="store_true", help="replace existing RedOps adapter files")
+    install_parser.add_argument(
+        "--skill-path",
+        action="append",
+        default=None,
+        help="skill/repository root to scan for commands/*.md (repeatable)",
+    )
 
     ingest_parser = subparsers.add_parser("ingest", help="index Markdown knowledge")
     ingest_parser.add_argument("--force", action="store_true", help="rebuild changed embeddings")
@@ -93,7 +99,17 @@ def main() -> None:
     if args.command == "install-cli":
         from .integrations import install_integrations
 
-        print(json.dumps(install_integrations(args.target, dry_run=args.dry_run, force=args.force), indent=2))
+        print(
+            json.dumps(
+                install_integrations(
+                    args.target,
+                    dry_run=args.dry_run,
+                    force=args.force,
+                    skill_paths=args.skill_path,
+                ),
+                indent=2,
+            )
+        )
         return
     if args.command == "exegol-mcp":
         from .exegol_mcp import serve_stdio

@@ -26,3 +26,41 @@ def test_skill_slash_commands_are_installed_for_supported_clients(tmp_path, monk
         assert (root / "mobile-vuln-hunt.md").exists()
         assert (root / "reverse-engineer.md").exists()
         assert (root / "afl-fuzzing.md").exists()
+
+
+def test_skill_repository_commands_are_discovered_and_copied(tmp_path, monkeypatch):
+    skill_repo = tmp_path / "mobile-reverse-skill"
+    command_dir = skill_repo / ".agents" / "commands"
+    command_dir.mkdir(parents=True)
+    command = command_dir / "observe-runtime.md"
+    command.write_text("---\ndescription: observe\n---\n$ARGUMENTS\n", encoding="utf-8")
+    duplicate_dir = skill_repo / ".claude" / "commands"
+    duplicate_dir.mkdir(parents=True)
+    (duplicate_dir / "observe-runtime.md").write_text("duplicate", encoding="utf-8")
+    (command_dir / "README.md").write_text("not a command", encoding="utf-8")
+    monkeypatch.setenv("CLAUDE_HOME", str(tmp_path / "claude"))
+    monkeypatch.setenv("OPENCODE_HOME", str(tmp_path / "opencode"))
+
+    result = install_integrations("all", skill_paths=[skill_repo])
+
+    assert any(item["path"].endswith("observe-runtime.md") for item in result)
+    assert sum(item["path"].endswith("observe-runtime.md") for item in result) == 2
+    for root in (tmp_path / "claude" / "commands", tmp_path / "opencode" / "commands"):
+        assert (root / "observe-runtime.md").read_text(encoding="utf-8") == command.read_text(encoding="utf-8")
+        assert not (root / "README.md").exists()
+
+
+def test_skill_command_does_not_replace_existing_file_without_force(tmp_path, monkeypatch):
+    skill_repo = tmp_path / "skill"
+    command_dir = skill_repo / "commands"
+    command_dir.mkdir(parents=True)
+    (command_dir / "custom.md").write_text("new", encoding="utf-8")
+    claude = tmp_path / "claude"
+    existing = claude / "commands" / "custom.md"
+    existing.parent.mkdir(parents=True)
+    existing.write_text("user-owned", encoding="utf-8")
+    monkeypatch.setenv("CLAUDE_HOME", str(claude))
+
+    install_integrations("claude", skill_paths=[skill_repo])
+
+    assert existing.read_text(encoding="utf-8") == "user-owned"
