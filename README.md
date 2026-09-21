@@ -133,6 +133,11 @@ assessment seperti `bloodhound-python` dijalankan di image Exegol/lingkungan yan
 disetujui; installer tidak memasang tool ofensif ke host secara diam-diam. Installer
 tidak menghapus data dan tidak melakukan `git reset --hard`.
 
+Pada terminal interaktif, installer memeriksa required/optional tools dan menawarkan
+instalasi dependency Python yang didukung dengan konfirmasi `y/n`. Tekan `n` untuk
+melewati dan gunakan Exegol. MCP mobile `uiautomator2` juga opsional dan ditawarkan
+terpisah. Untuk otomasi CI, gunakan `REDOPS_AUTO_INSTALL_TOOLS=never` atau `always`.
+
 Manual dengan pipx:
 
 ```bash

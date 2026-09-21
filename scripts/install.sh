@@ -15,13 +15,26 @@ fi
 
 START_TIME=$(date +%s)
 phase=0
-total_phases=7
+total_phases=8
 log() { printf '%s[%s]%s %s\n' "$C_DIM$(date +%H:%M:%S)" "$1" "$C_RESET" "${*:2}"; }
 phase() { phase=$((phase + 1)); log "${C_BLUE}${phase}/${total_phases}${C_RESET}" "$*"; }
 ok() { log "${C_GREEN}OK${C_RESET}" "$*"; }
 warn() { log "${C_YELLOW}WARN${C_RESET}" "$*" >&2; }
 die() { log "${C_RED}FAIL${C_RESET}" "$*" >&2; exit 1; }
 trap 'die "Installation failed near line ${LINENO}"' ERR
+
+ask_yes_no() {
+  local prompt_text answer mode
+  mode="${REDOPS_AUTO_INSTALL_TOOLS:-ask}"
+  if [[ "$mode" == "always" ]]; then
+    return 0
+  fi
+  if [[ "$mode" == "never" || ! -r /dev/tty ]]; then
+    return 1
+  fi
+  read -r -p "$prompt_text [y/N] " answer < /dev/tty
+  [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]]
+}
 
 phase "Checking prerequisites"
 command -v python3 >/dev/null 2>&1 || die "python3 is required (3.11+)."
@@ -54,12 +67,36 @@ phase "Installing RedOps CLI"
 ln -sfn "$INSTALL_ROOT/.venv/bin/redops" "$BIN_DIR/redops"
 ok "CLI linked at ${BIN_DIR}/redops"
 
-phase "Configuring CLI adapters"
+phase "Installing agent skills and CLI adapters"
 # Install non-secret CLI adapters without replacing user-customized files.
 "$BIN_DIR/redops" install-cli all >/dev/null
-ok "Codex, Claude CLI, and OpenCode adapters verified"
+ok "RedOps skill installed for Codex, Claude CLI, and OpenCode"
 
-phase "Publishing agent manifests"
+phase "Checking required and optional tools"
+tool_report=$("$INSTALL_ROOT/.venv/bin/python" "$INSTALL_ROOT/scripts/check_tools.py" \
+  --manifest "$INSTALL_ROOT/agents/agent-tools.generated.yaml" \
+  --venv-bin "$INSTALL_ROOT/.venv/bin")
+required_missing=$(printf '%s\n' "$tool_report" | sed -n 's/^required missing: //p')
+optional_missing=$(printf '%s\n' "$tool_report" | sed -n 's/^optional missing: //p')
+if [[ "$required_missing" == "none" && "$optional_missing" == "none" ]]; then
+  ok "all required host capabilities detected"
+else
+  [[ "$required_missing" != "none" ]] && warn "required capabilities missing: ${required_missing}"
+  [[ "$optional_missing" != "none" ]] && log "INFO" "optional capabilities missing: ${optional_missing}"
+  if ask_yes_no "Attempt supported Python tool installs into the RedOps venv?"; then
+    tool_install_report=$("$INSTALL_ROOT/.venv/bin/python" "$INSTALL_ROOT/scripts/check_tools.py" \
+      --manifest "$INSTALL_ROOT/agents/agent-tools.generated.yaml" \
+      --venv-bin "$INSTALL_ROOT/.venv/bin" --install)
+    ok "supported Python tool installation attempted"
+    while IFS= read -r install_line; do
+      [[ "$install_line" == install\ * ]] && log "INFO" "$install_line"
+    done <<< "$tool_install_report"
+  else
+    warn "skipped tool installation; use Exegol for missing capabilities"
+  fi
+fi
+
+phase "Preparing MCP configuration"
 # Publish generated, non-secret tool/MCP manifests for agents and CLI clients.
 mkdir -p "$RUNTIME_DIR"
 cp "$INSTALL_ROOT/agents/agent-tools.generated.yaml" "$RUNTIME_DIR/agent-tools.yaml"
@@ -74,7 +111,33 @@ cat > "$RUNTIME_DIR/mcp.json" <<EOF
   }
 }
 EOF
-ok "tool and Exegol MCP manifests written"
+ok "Exegol MCP manifest written"
+if ask_yes_no "Install optional uiautomator2 mobile MCP?"; then
+  mobile_mcp_root="${REDOPS_MOBILE_MCP_ROOT:-${HOME}/tools/uiautomator2-mcp}"
+  if [ ! -d "$mobile_mcp_root/.git" ]; then
+    mkdir -p "$(dirname "$mobile_mcp_root")"
+    git clone --quiet --depth 1 https://github.com/fdciabdul/uiautomator2-mcp.git "$mobile_mcp_root"
+  fi
+  python3 -m venv "$mobile_mcp_root/.venv"
+  "$mobile_mcp_root/.venv/bin/python" -m pip install -r "$mobile_mcp_root/requirements.txt" >/dev/null 2>&1
+  "$INSTALL_ROOT/.venv/bin/python" - "$RUNTIME_DIR/mcp.json" "$mobile_mcp_root" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+config_path = Path(sys.argv[1])
+root = Path(sys.argv[2])
+config = json.loads(config_path.read_text(encoding="utf-8"))
+config.setdefault("mcpServers", {})["uiautomator2"] = {
+    "command": str(root / ".venv/bin/python"),
+    "args": [str(root / "server.py")],
+}
+config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+PY
+  ok "uiautomator2 MCP installed at ${mobile_mcp_root}"
+else
+  log "INFO" "optional mobile MCP skipped"
+fi
 
 phase "Verifying installation"
 provider_count=$("$BIN_DIR/redops" providers | wc -l | tr -d ' ')
