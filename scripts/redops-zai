@@ -1,7 +1,15 @@
 #!/bin/sh
 set -eu
 
-REDOPS_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+SCRIPT_PATH=$0
+while [ -L "$SCRIPT_PATH" ]; do
+    LINK=$(readlink "$SCRIPT_PATH")
+    case "$LINK" in
+        /*) SCRIPT_PATH=$LINK ;;
+        *) SCRIPT_PATH=$(dirname "$SCRIPT_PATH")/$LINK ;;
+    esac
+done
+REDOPS_ROOT=$(CDPATH= cd -- "$(dirname -- "$SCRIPT_PATH")/.." && pwd)
 export REDOPS_ROOT
 
 exec python3 - "$@" <<'PY'

@@ -27,8 +27,15 @@ python3 -m venv "$INSTALL_ROOT/.venv"
 "$INSTALL_ROOT/.venv/bin/python" -m pip install -e "$INSTALL_ROOT" >/dev/null
 ln -sfn "$INSTALL_ROOT/.venv/bin/redops" "$BIN_DIR/redops"
 
+# Install non-secret CLI adapters without replacing user-customized files.
+"$BIN_DIR/redops" install-cli all >/dev/null
+ln -sfn "$INSTALL_ROOT/scripts/claude-zai" "$BIN_DIR/claude-zai"
+ln -sfn "$INSTALL_ROOT/scripts/redops-zai" "$BIN_DIR/redops-zai"
+
 printf 'RedOps installed at %s\n' "$INSTALL_ROOT"
 printf 'CLI: %s/redops\n' "$BIN_DIR"
+printf 'Claude Z.ai launcher: %s/claude-zai\n' "$BIN_DIR"
+printf 'RAG adapters: Codex, Claude CLI, and OpenCode\n'
 if [[ ":${PATH}:" != *":${BIN_DIR}:"* ]]; then
   printf 'Add to PATH: export PATH="%s:$PATH"\n' "$BIN_DIR"
 fi

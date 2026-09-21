@@ -124,9 +124,12 @@ One-liner (macOS/Linux):
 curl -fsSL https://raw.githubusercontent.com/alvinhayy/RedOps/master/scripts/install.sh | bash
 ```
 
-Installer menyimpan checkout di `~/.local/share/redops` dan CLI di `~/.local/bin/redops`.
-Override dengan `REDOPS_INSTALL_ROOT`, `REDOPS_BIN_DIR`, atau `REDOPS_REF`; installer
-tidak menghapus data dan tidak melakukan `git reset --hard`.
+Installer menyimpan checkout di `~/.local/share/redops` dan CLI/launcher di
+`~/.local/bin`. Selain RedOps, adapter `redops-rag` dipasang ke Codex, Claude CLI,
+dan OpenCode secara idempoten; `claude-zai` mengambil key dari konfigurasi OpenCode
+tanpa mengubah login OAuth Claude. Override dengan `REDOPS_INSTALL_ROOT`,
+`REDOPS_BIN_DIR`, atau `REDOPS_REF`; installer tidak menghapus data dan tidak melakukan
+`git reset --hard`.
 
 Manual dengan pipx:
 
