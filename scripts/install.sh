@@ -30,8 +30,6 @@ ln -sfn "$INSTALL_ROOT/.venv/bin/redops" "$BIN_DIR/redops"
 
 # Install non-secret CLI adapters without replacing user-customized files.
 "$BIN_DIR/redops" install-cli all >/dev/null
-ln -sfn "$INSTALL_ROOT/scripts/claude-zai" "$BIN_DIR/claude-zai"
-ln -sfn "$INSTALL_ROOT/scripts/redops-zai" "$BIN_DIR/redops-zai"
 
 # Publish generated, non-secret tool/MCP manifests for agents and CLI clients.
 mkdir -p "$RUNTIME_DIR"
@@ -50,7 +48,6 @@ EOF
 
 printf 'RedOps installed at %s\n' "$INSTALL_ROOT"
 printf 'CLI: %s/redops\n' "$BIN_DIR"
-printf 'Claude Z.ai launcher: %s/claude-zai\n' "$BIN_DIR"
 printf 'RAG adapters: Codex, Claude CLI, and OpenCode\n'
 printf 'Tool manifest: %s/agent-tools.yaml\n' "$RUNTIME_DIR"
 printf 'MCP profile/config: %s/mcp-profiles.yaml and %s/mcp.json\n' "$RUNTIME_DIR" "$RUNTIME_DIR"

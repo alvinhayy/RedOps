@@ -124,10 +124,9 @@ One-liner (macOS/Linux):
 curl -fsSL https://raw.githubusercontent.com/alvinhayy/RedOps/master/scripts/install.sh | bash
 ```
 
-Installer menyimpan checkout di `~/.local/share/redops` dan CLI/launcher di
+Installer menyimpan checkout di `~/.local/share/redops` dan CLI di
 `~/.local/bin`. Selain RedOps, adapter `redops-rag` dipasang ke Codex, Claude CLI,
-dan OpenCode secara idempoten; `claude-zai` mengambil key dari konfigurasi OpenCode
-tanpa mengubah login OAuth Claude. Override dengan `REDOPS_INSTALL_ROOT`,
+dan OpenCode secara idempoten. Override dengan `REDOPS_INSTALL_ROOT`,
 `REDOPS_BIN_DIR`, `REDOPS_RUNTIME_DIR`, atau `REDOPS_REF`. Installer juga menulis
 manifest tools dan konfigurasi MCP Exegol non-secret ke `~/.config/redops/`. Tool
 assessment seperti `bloodhound-python` dijalankan di image Exegol/lingkungan yang
@@ -161,22 +160,6 @@ cp .env.example .env
 redops ingest
 redops stats
 redops query "Bagaimana melakukan enumerasi Active Directory?"
-```
-
-Untuk menjalankan RedOps memakai provider Z.ai yang sudah dikonfigurasi di OpenCode,
-gunakan wrapper berikut. API key dibaca saat runtime dan tidak ditulis ke repo:
-
-```bash
-./scripts/redops-zai query "ringkas fungsi RedOps" --top-k 3
-```
-
-Untuk Claude CLI, gunakan launcher terpisah berikut. `claude-zai` memakai key Z.ai
-dari OpenCode hanya untuk proses tersebut; perintah `claude` biasa tetap menggunakan
-OAuth:
-
-```bash
-./scripts/claude-zai
-./scripts/claude-zai --model glm-5.3
 ```
 
 Variabel `.env` tidak otomatis dimuat oleh aplikasi. Ekspor variabel yang diperlukan,
