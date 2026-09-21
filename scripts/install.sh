@@ -24,8 +24,13 @@ die() { log "${C_RED}FAIL${C_RESET}" "$*" >&2; exit 1; }
 trap 'die "Installation failed near line ${LINENO}"' ERR
 
 ask_yes_no() {
-  local prompt_text answer mode
-  mode="${REDOPS_AUTO_INSTALL_TOOLS:-ask}"
+  local prompt_text setting_name answer mode
+  prompt_text="$1"
+  setting_name="${2:-REDOPS_AUTO_INSTALL_TOOLS}"
+  case "$setting_name" in
+    REDOPS_AUTO_INSTALL_MCP) mode="${REDOPS_AUTO_INSTALL_MCP:-ask}" ;;
+    *) mode="${REDOPS_AUTO_INSTALL_TOOLS:-ask}" ;;
+  esac
   if [[ "$mode" == "always" ]]; then
     return 0
   fi
@@ -83,7 +88,7 @@ if [[ "$required_missing" == "none" && "$optional_missing" == "none" ]]; then
 else
   [[ "$required_missing" != "none" ]] && warn "required capabilities missing: ${required_missing}"
   [[ "$optional_missing" != "none" ]] && log "INFO" "optional capabilities missing: ${optional_missing}"
-  if ask_yes_no "Attempt supported Python tool installs into the RedOps venv?"; then
+  if ask_yes_no "Attempt supported Python tool installs into the RedOps venv?" REDOPS_AUTO_INSTALL_TOOLS; then
     tool_install_report=$("$INSTALL_ROOT/.venv/bin/python" "$INSTALL_ROOT/scripts/check_tools.py" \
       --manifest "$INSTALL_ROOT/agents/agent-tools.generated.yaml" \
       --venv-bin "$INSTALL_ROOT/.venv/bin" --install)
@@ -112,7 +117,7 @@ cat > "$RUNTIME_DIR/mcp.json" <<EOF
 }
 EOF
 ok "Exegol MCP manifest written"
-if ask_yes_no "Install optional uiautomator2 mobile MCP?"; then
+if ask_yes_no "Install optional uiautomator2 mobile MCP?" REDOPS_AUTO_INSTALL_MCP; then
   mobile_mcp_root="${REDOPS_MOBILE_MCP_ROOT:-${HOME}/tools/uiautomator2-mcp}"
   if [ ! -d "$mobile_mcp_root/.git" ]; then
     mkdir -p "$(dirname "$mobile_mcp_root")"

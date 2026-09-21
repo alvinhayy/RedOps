@@ -136,7 +136,8 @@ tidak menghapus data dan tidak melakukan `git reset --hard`.
 Pada terminal interaktif, installer memeriksa required/optional tools dan menawarkan
 instalasi dependency Python yang didukung dengan konfirmasi `y/n`. Tekan `n` untuk
 melewati dan gunakan Exegol. MCP mobile `uiautomator2` juga opsional dan ditawarkan
-terpisah. Untuk otomasi CI, gunakan `REDOPS_AUTO_INSTALL_TOOLS=never` atau `always`.
+terpisah. Untuk otomasi CI, gunakan `REDOPS_AUTO_INSTALL_TOOLS=never|always` dan
+`REDOPS_AUTO_INSTALL_MCP=never|always`.
 
 Manual dengan pipx:
 
