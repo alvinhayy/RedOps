@@ -16,6 +16,7 @@
   <a href="#features">Features</a> •
   <a href="#installation">Installation</a> •
   <a href="#quick-start">Quick Start</a> •
+  <a href="#rag-mcp">RAG MCP</a> •
   <a href="#agent-cli-integrations">CLI Integrations</a> •
   <a href="#safety-boundary">Safety</a>
 </p>
@@ -62,9 +63,10 @@ masing-masing dari [`agents/registry.yaml`](agents/registry.yaml):
 | Web3 | Smart contract, DeFi, wallet, DApp | [`web3.md`](agents/web3.md) |
 | RAG Curator | Ingest, niche classification, noise cleanup, QA | [`rag-curator.md`](agents/rag-curator.md) |
 
-MCP inti RedOps hanya **Exegol**. Semua agent memakai tool yang sesuai profil melalui
-container Exegol, dengan knowledge path dan guardrail yang tetap terpisah per niche.
-Lihat [tool matrix](agents/skill-tool-matrix.yaml) dan [MCP setup](docs/MCP-SETUP.md).
+Semua agent mendapatkan MCP `redops-rag` untuk retrieval knowledge/writeup. Exegol tetap
+menjadi backend eksekusi utama; connector lain hanya dipakai jika profil dan scope
+membutuhkannya. Lihat [tool matrix](agents/skill-tool-matrix.yaml) dan
+[MCP setup](docs/MCP-SETUP.md).
 
 ### Skills
 
@@ -81,10 +83,11 @@ Skill dipilih berdasarkan task, bukan dipasang ke semua agent:
 
 ### MCP
 
-Deployment RedOps yang didukung README ini menggunakan satu MCP inti:
+Deployment RedOps menggunakan MCP read-only untuk knowledge dan MCP eksekusi terisolasi:
 
 | MCP | Peran |
 |---|---|
+| **RedOps RAG** | Retrieval teknik/metodologi dan writeup dengan provenance; tidak menjalankan command |
 | **Exegol MCP** | Menyediakan environment CLI terisolasi untuk tool agent; command diteruskan sebagai argv tanpa shell |
 
 ### CLI tools per agent
@@ -186,6 +189,7 @@ Lihat status runtime tanpa menampilkan secret, atau gunakan shell interaktif:
 ```bash
 redops status
 redops interactive
+redops rag-mcp
 ```
 
 Di shell interaktif, masukkan pertanyaan langsung. Gunakan `/help`, `/status`,
@@ -215,7 +219,8 @@ format workspace-only Copilot (`.github/prompts`) dan Windsurf (`.windsurf/workf
 Override path dengan `CODEX_HOME`, `CLAUDE_HOME`, `OPENCODE_HOME`, `AGENTS_HOME`,
 `CURSOR_HOME`, atau `GEMINI_HOME`; gunakan `--force` hanya jika ingin mengganti adapter
 yang sudah ada. Detail format provider tersedia di [`docs/providers.md`](docs/providers.md).
-Setelah instalasi, restart CLI terkait agar skill/command baru dimuat.
+Setelah instalasi, restart CLI terkait agar skill/command baru dimuat. Konfigurasi MCP
+non-secret ditulis ke `~/.config/redops/mcp.json`.
 
 Untuk menjalankan API:
 
@@ -257,9 +262,28 @@ vulnerability hunt, konfirmasi Frida/Exegol di lab lokal, dan fuzzing native
 opsional pada emulator offline. Static analysis tidak menjalankan aplikasi target;
 semua pengujian harus memiliki otorisasi tertulis.
 
-Runtime Android bersifat opsional dan tetap dijalankan melalui Exegol pada emulator/device
-lab yang disposable. Instalasi default tidak menambahkan connector MCP tambahan atau token;
-Exegol adalah satu-satunya MCP yang diperlukan oleh deployment RedOps.
+Runtime Android bersifat opsional dan dilakukan pada emulator/device lab yang disposable.
+Exegol tetap diprioritaskan untuk tool CLI; `uiautomator2` hanya ditambahkan jika MCP
+mobile tersebut memang dibutuhkan.
+
+## RAG MCP
+
+RedOps menyediakan MCP read-only yang mengikuti pola dual-corpus RedDelta: corpus teknik
+di `knowledge/` dan corpus writeup di `writeups/`. Jalankan melalui stdio:
+
+```bash
+redops rag-mcp
+```
+
+Tool yang tersedia adalah `search_knowledge`, `search_writeups`, dan `knowledge_stats`.
+MCP ini hanya mengambil sumber yang sudah diindeks dan mengembalikan provenance RedOps;
+ia tidak dapat menjalankan Exegol, mengubah target, atau membaca API key. Setelah menambah
+atau membersihkan Markdown, rebuild index:
+
+```bash
+redops ingest --force
+redops stats
+```
 
 ### MCP Exegol
 
@@ -330,7 +354,7 @@ Jangan commit API key. Perubahan provider/model/dimensi embedding memerlukan
 
 ## Knowledge Format
 
-Semua `knowledge/**/*.md` akan diindeks. Front matter berikut direkomendasikan agar
+Semua `knowledge/**/*.md` dan, jika tersedia, `writeups/**/*.md` akan diindeks. Front matter berikut direkomendasikan agar
 sitasi mengarah ke sumber asli:
 
 ```markdown
@@ -344,8 +368,10 @@ fetched_at: 2026-09-20T00:00:00Z
 ...
 ```
 
-Corpus dan alat refresh di dalam `knowledge/` dikelola terpisah dari framework. Setelah
-refresh, jalankan `redops ingest`; hanya dokumen berubah yang dihitung ulang.
+Corpus dan alat refresh di dalam `knowledge/` serta `writeups/` dikelola terpisah dari
+framework. Setelah refresh, jalankan `redops ingest`; hanya dokumen berubah yang dihitung
+ulang. Gunakan `--corpus knowledge` atau `--corpus writeups` pada query untuk membatasi
+retrieval.
 
 ## Testing
 
@@ -356,10 +382,11 @@ ruff check .
 
 ## Design Notes
 
-Backend SQLite melakukan pemindaian vector in-process. Ini sederhana dan ideal untuk
-corpus dokumentasi kecil/menengah. Untuk jutaan chunk, implementasikan backend `IndexStore`
-dengan vector database tanpa mengubah antarmuka service/API. Fallback extractive bukan LLM:
-ia mengembalikan cuplikan sumber, sehingga selalu eksplisit dan dapat diverifikasi.
+Backend SQLite melakukan pemindaian vector in-process dan menyimpan metadata corpus.
+Ini sederhana dan ideal untuk corpus dokumentasi kecil/menengah. Untuk jutaan chunk,
+implementasikan backend `IndexStore` dengan vector database tanpa mengubah antarmuka
+service/API. Fallback extractive bukan LLM: ia mengembalikan cuplikan sumber, sehingga
+selalu eksplisit dan dapat diverifikasi.
 
 ## Safety Boundary
 
