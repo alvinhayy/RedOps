@@ -38,7 +38,8 @@ memiliki izin eksplisit untuk diuji.
 - 10 profil agent berbasis niche dengan wiring Exegol dan tool yang eksplisit;
 - provenance berupa judul, heading, path lokal, dan URL asli;
 - provider registry untuk local extractive, OpenAI, Z.ai, DeepSeek, dan OrcaRouter;
-- installer adapter untuk Codex, Claude CLI, dan OpenCode;
+- installer adapter native untuk Codex, Claude CLI, OpenCode, ZCode, Cursor, Gemini,
+  Copilot, Windsurf, Amp, dan Crush;
 - bounded WAF timing benchmark dengan guardrail anti-DoS.
 
 ## Agent Profiles
@@ -132,8 +133,8 @@ curl -fsSL https://raw.githubusercontent.com/alvinhayy/RedOps/master/scripts/ins
 ```
 
 Installer menyimpan checkout di `~/.local/share/redops` dan CLI di
-`~/.local/bin`. Selain RedOps, adapter `redops-rag` dipasang ke Codex, Claude CLI,
-dan OpenCode secara idempoten. Override dengan `REDOPS_INSTALL_ROOT`,
+`~/.local/bin`. Selain RedOps, adapter `redops-rag` dipasang ke provider CLI yang
+didukung secara idempoten. Override dengan `REDOPS_INSTALL_ROOT`,
 `REDOPS_BIN_DIR`, `REDOPS_RUNTIME_DIR`, atau `REDOPS_REF`. Installer juga menulis
 manifest tools dan konfigurasi MCP Exegol non-secret ke `~/.config/redops/`. Tool
 assessment seperti `bloodhound-python` dijalankan di image Exegol/lingkungan yang
@@ -203,11 +204,13 @@ redops install-cli opencode
 redops install-cli all --skill-path /path/to/Mobile-ReverseSkill
 ```
 
-Target default adalah `~/.codex`, `~/.claude`, dan `~/.config/opencode`. Override path
-dengan `CODEX_HOME`, `CLAUDE_HOME`, atau `OPENCODE_HOME`; gunakan `--force` hanya jika
-ingin mengganti adapter RedOps yang sudah ada. Detail command dan provider tersedia di
-[`docs/providers.md`](docs/providers.md). Setelah instalasi, restart CLI terkait agar
-skill/command baru dimuat.
+Target default mencakup `~/.codex`, `~/.claude`, `~/.config/opencode`, `~/.agents`,
+`~/.cursor`, dan `~/.gemini`. Gunakan `--workspace /path/to/project` untuk menghasilkan
+format workspace-only Copilot (`.github/prompts`) dan Windsurf (`.windsurf/workflows`).
+Override path dengan `CODEX_HOME`, `CLAUDE_HOME`, `OPENCODE_HOME`, `AGENTS_HOME`,
+`CURSOR_HOME`, atau `GEMINI_HOME`; gunakan `--force` hanya jika ingin mengganti adapter
+yang sudah ada. Detail format provider tersedia di [`docs/providers.md`](docs/providers.md).
+Setelah instalasi, restart CLI terkait agar skill/command baru dimuat.
 
 Untuk menjalankan API:
 

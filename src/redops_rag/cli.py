@@ -19,7 +19,22 @@ def build_parser() -> argparse.ArgumentParser:
     status_parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
 
     install_parser = subparsers.add_parser("install-cli", help="install RedOps adapters for agent CLIs")
-    install_parser.add_argument("target", choices=("codex", "claude", "opencode", "all"))
+    install_parser.add_argument(
+        "target",
+        choices=(
+            "codex",
+            "claude",
+            "opencode",
+            "zcode",
+            "cursor",
+            "gemini",
+            "copilot",
+            "windsurf",
+            "amp",
+            "crush",
+            "all",
+        ),
+    )
     install_parser.add_argument("--dry-run", action="store_true", help="show paths without writing")
     install_parser.add_argument("--force", action="store_true", help="replace existing RedOps adapter files")
     install_parser.add_argument(
@@ -27,6 +42,10 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         default=None,
         help="skill/repository root to scan for commands/*.md (repeatable)",
+    )
+    install_parser.add_argument(
+        "--workspace",
+        help="workspace root for Copilot prompts and Windsurf workflows",
     )
 
     ingest_parser = subparsers.add_parser("ingest", help="index Markdown knowledge")
@@ -106,6 +125,7 @@ def main() -> None:
                     dry_run=args.dry_run,
                     force=args.force,
                     skill_paths=args.skill_path,
+                    workspace=args.workspace,
                 ),
                 indent=2,
             )

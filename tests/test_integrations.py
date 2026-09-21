@@ -12,6 +12,9 @@ def test_install_all_is_idempotent(tmp_path, monkeypatch):
     monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex"))
     monkeypatch.setenv("CLAUDE_HOME", str(tmp_path / "claude"))
     monkeypatch.setenv("OPENCODE_HOME", str(tmp_path / "opencode"))
+    monkeypatch.setenv("AGENTS_HOME", str(tmp_path / "agents"))
+    monkeypatch.setenv("CURSOR_HOME", str(tmp_path / "cursor"))
+    monkeypatch.setenv("GEMINI_HOME", str(tmp_path / "gemini"))
     first = install_integrations("all")
     second = install_integrations("all")
     assert all(item["status"] == "installed" for item in first)
@@ -21,6 +24,9 @@ def test_install_all_is_idempotent(tmp_path, monkeypatch):
 def test_skill_slash_commands_are_installed_for_supported_clients(tmp_path, monkeypatch):
     monkeypatch.setenv("CLAUDE_HOME", str(tmp_path / "claude"))
     monkeypatch.setenv("OPENCODE_HOME", str(tmp_path / "opencode"))
+    monkeypatch.setenv("AGENTS_HOME", str(tmp_path / "agents"))
+    monkeypatch.setenv("CURSOR_HOME", str(tmp_path / "cursor"))
+    monkeypatch.setenv("GEMINI_HOME", str(tmp_path / "gemini"))
     install_integrations("all")
     for root in (tmp_path / "claude" / "commands", tmp_path / "opencode" / "commands"):
         assert (root / "mobile-vuln-hunt.md").exists()
@@ -41,13 +47,13 @@ def test_skill_repository_commands_are_discovered_and_copied(tmp_path, monkeypat
     monkeypatch.setenv("CLAUDE_HOME", str(tmp_path / "claude"))
     monkeypatch.setenv("OPENCODE_HOME", str(tmp_path / "opencode"))
 
-    result = install_integrations("all", skill_paths=[skill_repo])
+    result = install_integrations("claude", skill_paths=[skill_repo])
 
     assert any(item["path"].endswith("observe-runtime.md") for item in result)
-    assert sum(item["path"].endswith("observe-runtime.md") for item in result) == 2
-    for root in (tmp_path / "claude" / "commands", tmp_path / "opencode" / "commands"):
-        assert (root / "observe-runtime.md").read_text(encoding="utf-8") == command.read_text(encoding="utf-8")
-        assert not (root / "README.md").exists()
+    assert sum(item["path"].endswith("observe-runtime.md") for item in result) == 1
+    root = tmp_path / "claude" / "commands"
+    assert (root / "observe-runtime.md").read_text(encoding="utf-8") == command.read_text(encoding="utf-8")
+    assert not (root / "README.md").exists()
 
 
 def test_skill_command_does_not_replace_existing_file_without_force(tmp_path, monkeypatch):
@@ -64,3 +70,25 @@ def test_skill_command_does_not_replace_existing_file_without_force(tmp_path, mo
     install_integrations("claude", skill_paths=[skill_repo])
 
     assert existing.read_text(encoding="utf-8") == "user-owned"
+
+
+def test_native_provider_formats_are_generated(tmp_path, monkeypatch):
+    skill_repo = tmp_path / "skill"
+    command_dir = skill_repo / "commands"
+    command_dir.mkdir(parents=True)
+    (command_dir / "demo.md").write_text(
+        "---\ndescription: Demo command\n---\nRun the demo for $ARGUMENTS\n", encoding="utf-8"
+    )
+    monkeypatch.setenv("AGENTS_HOME", str(tmp_path / "agents"))
+    monkeypatch.setenv("CURSOR_HOME", str(tmp_path / "cursor"))
+    monkeypatch.setenv("GEMINI_HOME", str(tmp_path / "gemini"))
+
+    install_integrations("all", skill_paths=[skill_repo], workspace=tmp_path / "workspace")
+
+    assert (tmp_path / "agents/commands/demo.md").exists()
+    assert (tmp_path / "cursor/commands/demo.md").exists()
+    gemini = (tmp_path / "gemini/commands/demo.toml").read_text(encoding="utf-8")
+    assert 'description = "Demo command"' in gemini
+    assert "{{args}}" in gemini
+    assert (tmp_path / "workspace/.github/prompts/demo.prompt.md").exists()
+    assert (tmp_path / "workspace/.windsurf/workflows/demo.md").exists()

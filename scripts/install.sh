@@ -75,7 +75,7 @@ ok "CLI linked at ${BIN_DIR}/redops"
 phase "Installing agent skills and CLI adapters"
 # Install non-secret CLI adapters without replacing user-customized files.
 "$BIN_DIR/redops" install-cli all >/dev/null
-ok "RedOps skill installed for Codex, Claude CLI, and OpenCode"
+ok "RedOps skills/commands installed for supported agent providers"
 
 phase "Checking required and optional tools"
 tool_report=$("$INSTALL_ROOT/.venv/bin/python" "$INSTALL_ROOT/scripts/check_tools.py" \
@@ -158,7 +158,7 @@ fi
 elapsed=$(( $(date +%s) - START_TIME ))
 printf '\n%sRedOps installation complete%s (%ss)\n' "$C_GREEN" "$C_RESET" "$elapsed"
 printf '  CLI       %s/redops\n' "$BIN_DIR"
-printf '  Adapters  Codex · Claude CLI · OpenCode\n'
+printf '  Adapters  Codex · Claude · OpenCode · ZCode · Cursor · Gemini · Copilot · Windsurf\n'
 printf '  Tools     %s/agent-tools.yaml\n' "$RUNTIME_DIR"
 printf '  MCP       %s/mcp.json\n' "$RUNTIME_DIR"
 printf '  Next      redops status  |  redops interactive\n'

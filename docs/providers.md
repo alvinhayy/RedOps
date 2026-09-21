@@ -4,15 +4,27 @@ RedOps supports the providers configured in OpenCode through one stable interfac
 providers use the OpenAI-compatible `/chat/completions` contract; the local `extractive`
 provider requires no network or credentials.
 
-Install the CLI adapters for Codex, Claude CLI, and OpenCode with:
+Install the CLI adapters for all supported agent providers with:
 
 ```bash
 redops install-cli all --dry-run
 redops install-cli all
+# Copilot/Windsurf commands are workspace files:
+redops install-cli all --workspace /path/to/project
 ```
 
 The installer writes only RedOps command/skill text. It does not write API keys, MCP
 tokens, or provider configuration.
+
+## Agent provider formats
+
+The adapter follows each provider's native layout. Claude and OpenCode use Markdown
+commands, ZCode and Cursor use the shared `.agents`/`.cursor` command directories,
+Gemini receives TOML commands (`$ARGUMENTS` is translated to `{{args}}`), and Copilot
+and Windsurf receive workspace prompt/workflow files. Codex, Amp, and Crush use the
+model-invoked `redops-rag` skill because they do not expose a user-defined slash-command
+directory. Skill command files are discovered automatically from `commands/` and
+`.agents/commands/`; use `--skill-path` for an external skill repository.
 
 List the registry without exposing credentials:
 
