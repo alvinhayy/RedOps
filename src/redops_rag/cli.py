@@ -57,6 +57,12 @@ def build_parser() -> argparse.ArgumentParser:
     query_parser.add_argument("--no-generate", action="store_true")
     query_parser.add_argument("--corpus", choices=("knowledge", "writeups"))
 
+    orchestrate_parser = subparsers.add_parser(
+        "orchestrate", help="build a read-only specialist-agent delegation plan"
+    )
+    orchestrate_parser.add_argument("task")
+    orchestrate_parser.add_argument("--limit", type=int, default=3)
+
     interactive_parser = subparsers.add_parser(
         "interactive", aliases=["shell"], help="open an interactive RAG query shell"
     )
@@ -142,6 +148,15 @@ def main() -> None:
         from .rag_mcp import serve_stdio
 
         serve_stdio()
+        return
+    if args.command == "orchestrate":
+        from .orchestrator import route_task
+
+        try:
+            print(json.dumps(route_task(args.task, args.limit), indent=2, ensure_ascii=False))
+        except ValueError as exc:
+            print(json.dumps({"error": "invalid_task", "message": str(exc)}))
+            raise SystemExit(2) from exc
         return
     if args.command == "exegol":
         try:

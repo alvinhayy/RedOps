@@ -43,12 +43,14 @@ description: Source-grounded authorized pentest RAG workflow.
 """ + INTEGRATION_TEXT
 
 ORCHESTRATOR_COMMAND_TEXT = (
-    "Act as the RedOps orchestrator for $ARGUMENTS. Load the orchestrator_agent profile, "
-    "classify the task into the narrowest niche agent, and retrieve relevant context with "
-    "the redops-rag MCP or `redops query --no-generate`. Confirm written scope before any "
-    "active testing, delegate only to the selected specialist, preserve [S#] citations and "
-    "source URLs, and never claim a command ran without its output. Execution remains "
-    "Exegol-first and belongs to the specialist agent."
+    "Act as the RedOps orchestrator for $ARGUMENTS. First call the `route_task` tool "
+    "from the redops-rag MCP (or run `redops orchestrate`), load the returned agent "
+    "profile, and delegate to every selected specialist using the provider's native "
+    "agent/task mechanism. Retrieve context with `search_knowledge`/`search_writeups` "
+    "before delegation. Confirm written scope before any active testing, pass each "
+    "specialist only its scoped evidence and delegation contract, preserve [S#] "
+    "citations and source URLs, and never claim a command ran without its output. "
+    "Execution remains Exegol-first and belongs to the specialist agent."
 )
 
 

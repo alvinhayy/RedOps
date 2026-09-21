@@ -10,6 +10,7 @@ import json
 import sys
 from typing import Any
 
+from .orchestrator import route_task
 from .service import RagService
 
 AUTH_WARNING = "Use only with authorized security-testing knowledge and artifacts."
@@ -45,6 +46,19 @@ TOOLS = [
         "description": "Return indexed document/chunk counts by corpus.",
         "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False},
     },
+    {
+        "name": "route_task",
+        "description": "Select RedOps specialist agents for an authorized task; routing only.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "task": {"type": "string", "minLength": 1},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 5},
+            },
+            "required": ["task"],
+            "additionalProperties": False,
+        },
+    },
 ]
 
 
@@ -73,6 +87,10 @@ class RagMcpServer:
                 if arguments:
                     raise ValueError("knowledge_stats accepts no arguments")
                 payload = self.service.store.stats()
+            elif name == "route_task":
+                task = arguments.get("task")
+                limit = arguments.get("limit", 3)
+                payload = route_task(task, limit)
             else:
                 raise ValueError(f"unknown tool: {name}")
             return {"content": [{"type": "text", "text": json.dumps(payload, ensure_ascii=False)}]}

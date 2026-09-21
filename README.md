@@ -282,7 +282,9 @@ di `knowledge/` dan corpus writeup di `writeups/`. Jalankan melalui stdio:
 redops rag-mcp
 ```
 
-Tool yang tersedia adalah `search_knowledge`, `search_writeups`, dan `knowledge_stats`.
+Tool yang tersedia adalah `route_task`, `search_knowledge`, `search_writeups`, dan
+`knowledge_stats`. `route_task` hanya menghasilkan delegation plan berdasarkan agent
+registry; provider CLI-lah yang menjalankan delegation ke specialist agent.
 MCP ini hanya mengambil sumber yang sudah diindeks dan mengembalikan provenance RedOps;
 ia tidak dapat menjalankan Exegol, mengubah target, atau membaca API key. Setelah menambah
 atau membersihkan Markdown, rebuild index:

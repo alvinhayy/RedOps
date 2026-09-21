@@ -27,6 +27,7 @@ def test_rag_mcp_searches_each_corpus():
         "search_knowledge",
         "search_writeups",
         "knowledge_stats",
+        "route_task",
     }
     result = server.call_tool("search_writeups", {"query": "case", "n_results": 3})
     assert json.loads(result["content"][0]["text"])["sources"][0]["corpus"] == "writeups"
@@ -36,3 +37,12 @@ def test_rag_mcp_searches_each_corpus():
 def test_rag_mcp_rejects_invalid_queries():
     result = RagMcpServer(FakeService()).call_tool("search_knowledge", {"query": "", "n_results": 2})
     assert result["isError"] is True
+
+
+def test_rag_mcp_routes_to_specialist_agent():
+    result = RagMcpServer(FakeService()).call_tool(
+        "route_task", {"task": "audit an Android APK with Frida", "limit": 1}
+    )
+    payload = json.loads(result["content"][0]["text"])
+    assert payload["selected_agents"][0]["agent"] == "mobile_agent"
+    assert payload["authorization_required"] is True

@@ -6,7 +6,7 @@
       "name": "redops-rag",
       "skill": "redops-rag",
       "description": "Route an authorized task through the RedOps orchestrator and source-grounded RAG.",
-      "content": "Act as the RedOps orchestrator for $ARGUMENTS. Load the orchestrator_agent profile, classify the task into the narrowest niche agent, and retrieve relevant context with the redops-rag MCP or `redops query --no-generate`. Confirm written scope before any active testing, delegate only to the selected specialist, preserve [S#] citations and source URLs, and never claim a command ran without its output. Execution remains Exegol-first and belongs to the specialist agent."
+      "content": "Act as the RedOps orchestrator for $ARGUMENTS. First call the `route_task` tool from the redops-rag MCP (or run `redops orchestrate`), load the returned agent profile, and delegate to every selected specialist using the provider's native agent/task mechanism. Retrieve context with `search_knowledge`/`search_writeups` before delegation. Confirm written scope before any active testing, pass each specialist only its scoped evidence and delegation contract, preserve [S#] citations and source URLs, and never claim a command ran without its output. Execution remains Exegol-first and belongs to the specialist agent."
     },
     {
       "name": "mobile-vuln-hunt",
