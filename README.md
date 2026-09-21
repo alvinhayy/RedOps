@@ -164,6 +164,15 @@ gunakan wrapper berikut. API key dibaca saat runtime dan tidak ditulis ke repo:
 ./scripts/redops-zai query "ringkas fungsi RedOps" --top-k 3
 ```
 
+Untuk Claude CLI, gunakan launcher terpisah berikut. `claude-zai` memakai key Z.ai
+dari OpenCode hanya untuk proses tersebut; perintah `claude` biasa tetap menggunakan
+OAuth:
+
+```bash
+./scripts/claude-zai
+./scripts/claude-zai --model glm-5.3
+```
+
 Variabel `.env` tidak otomatis dimuat oleh aplikasi. Ekspor variabel yang diperlukan,
 atau jalankan dengan alat seperti `dotenv`/Docker Compose. Default aman dan lokal bisa
 langsung dipakai tanpa `.env`.
