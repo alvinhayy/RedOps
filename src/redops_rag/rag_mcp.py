@@ -10,6 +10,7 @@ import json
 import sys
 from typing import Any
 
+from .labs import lab_engagement, lab_ids
 from .orchestrator import route_task
 from .service import RagService
 from .workflow import plan_engagement
@@ -62,13 +63,16 @@ TOOLS = [
     },
     {
         "name": "plan_engagement",
-        "description": "Build a phase-gated RedOps engagement plan; planning only.",
+        "description": "Build a phase-gated RedOps engagement plan; planning only. "
+        "Optional lab/os_hint attach read-only lab target context without changing gates.",
         "inputSchema": {
             "type": "object",
             "properties": {
                 "task": {"type": "string", "minLength": 1},
                 "scope_confirmed": {"type": "boolean", "default": False},
                 "include_active": {"type": "boolean", "default": False},
+                "lab": {"type": "string", "enum": list(lab_ids())},
+                "os_hint": {"type": "string", "enum": ["unknown", "windows", "linux"]},
             },
             "required": ["task"],
             "additionalProperties": False,
@@ -107,11 +111,21 @@ class RagMcpServer:
                 limit = arguments.get("limit", 3)
                 payload = route_task(task, limit)
             elif name == "plan_engagement":
-                payload = plan_engagement(
-                    arguments.get("task"),
-                    scope_confirmed=arguments.get("scope_confirmed", False),
-                    include_active=arguments.get("include_active", False),
-                )
+                lab = arguments.get("lab")
+                if lab is None:
+                    payload = plan_engagement(
+                        arguments.get("task"),
+                        scope_confirmed=arguments.get("scope_confirmed", False),
+                        include_active=arguments.get("include_active", False),
+                    )
+                else:
+                    payload = lab_engagement(
+                        arguments.get("task"),
+                        lab=lab,
+                        os_hint=arguments.get("os_hint", "unknown"),
+                        scope_confirmed=arguments.get("scope_confirmed", False),
+                        include_active=arguments.get("include_active", False),
+                    )
             else:
                 raise ValueError(f"unknown tool: {name}")
             return {"content": [{"type": "text", "text": json.dumps(payload, ensure_ascii=False)}]}

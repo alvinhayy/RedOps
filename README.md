@@ -152,7 +152,14 @@ Workflow dapat diuji tanpa menyentuh target:
 ```bash
 redops workflow "assess a Linux server"
 redops orchestrate "audit an Active Directory domain"
+redops workflow "HTB Pro Lab tiered domain" --lab htb_pro_lab --os-hint windows
 ```
+
+Flag `--lab` (htb_lab, htb_pro_lab, htb_academy) melampirkan target context read-only
+untuk lab resmi seperti Hack The Box: metadata platform, network hint dokumentasi, dan
+routing hint specialist berdasarkan `--os-hint`. Lab context tidak pernah mengubah
+scope gates, tidak menerima/menyimpan VPN key atau API token, dan kebijakan
+Exegol-first tetap berlaku.
 
 Tool names are capability requirements; health-check them inside Exegol before use.
 Install only what the approved engagement needs and keep credentials outside the corpus.

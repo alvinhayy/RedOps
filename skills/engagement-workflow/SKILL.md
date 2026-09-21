@@ -20,3 +20,8 @@ Call `route_task` to select technical niche agents. Active phases remain blocked
 written scope, exact target allowlists, phase approval, and Exegol/runtime health are
 confirmed. Every handoff includes evidence, source citations, scope, artifacts, and
 open questions. Never include credentials or claim a command ran without output.
+
+For authorized lab platforms (Hack The Box), attach read-only target context with
+`redops workflow "<authorized task>" --lab htb_lab --os-hint windows`. Lab metadata
+never confirms scope, never stores VPN keys or API tokens, and leaves the gates and
+Exegol-first policy unchanged.

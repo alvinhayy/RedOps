@@ -4,6 +4,7 @@ import argparse
 import json
 
 from .execution import CommandRunner, ExecutionError
+from .labs import lab_ids
 from .providers import PROVIDERS
 from .service import RagService
 
@@ -74,6 +75,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--include-active",
         action="store_true",
         help="plan active phases after explicit scope confirmation",
+    )
+    workflow_parser.add_argument(
+        "--lab",
+        choices=lab_ids(),
+        default=None,
+        help="attach read-only lab target context (e.g. htb_lab); gates are unchanged",
+    )
+    workflow_parser.add_argument(
+        "--os-hint",
+        choices=("unknown", "windows", "linux"),
+        default="unknown",
+        help="lab target OS hint used only for specialist routing hints",
     )
 
     interactive_parser = subparsers.add_parser(
@@ -175,11 +188,22 @@ def main() -> None:
         from .workflow import plan_engagement
 
         try:
-            result = plan_engagement(
-                args.task,
-                scope_confirmed=args.scope_confirmed,
-                include_active=args.include_active,
-            )
+            if args.lab:
+                from .labs import lab_engagement
+
+                result = lab_engagement(
+                    args.task,
+                    lab=args.lab,
+                    os_hint=args.os_hint,
+                    scope_confirmed=args.scope_confirmed,
+                    include_active=args.include_active,
+                )
+            else:
+                result = plan_engagement(
+                    args.task,
+                    scope_confirmed=args.scope_confirmed,
+                    include_active=args.include_active,
+                )
         except ValueError as exc:
             print(json.dumps({"error": "invalid_workflow", "message": str(exc)}))
             raise SystemExit(2) from exc
