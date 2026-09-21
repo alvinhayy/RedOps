@@ -129,16 +129,41 @@ class IndexStore:
 
     def delete_missing(self, active_paths: set[str]) -> int:
         with self.connect() as db:
-            rows = db.execute("SELECT path FROM documents").fetchall()
-            missing = [row["path"] for row in rows if row["path"] not in active_paths]
-            for path in missing:
-                ids = db.execute(
-                    "SELECT c.id FROM chunks c JOIN documents d ON d.id=c.document_id WHERE d.path=?",
-                    (path,),
-                ).fetchall()
-                db.executemany("DELETE FROM chunks_fts WHERE chunk_id=?", [(row["id"],) for row in ids])
-                db.execute("DELETE FROM documents WHERE path=?", (path,))
-        return len(missing)
+            existing = db.execute("SELECT COUNT(*) AS count FROM documents").fetchone()["count"]
+            if not existing:
+                return 0
+            if not active_paths:
+                db.execute("DELETE FROM chunks_fts")
+                db.execute("DELETE FROM documents")
+                return existing
+
+            db.execute("CREATE TEMP TABLE active_paths (path TEXT PRIMARY KEY)")
+            db.executemany("INSERT INTO active_paths(path) VALUES(?)", [(path,) for path in active_paths])
+            missing = db.execute(
+                """
+                SELECT COUNT(*) AS count
+                FROM documents d
+                LEFT JOIN active_paths a ON a.path = d.path
+                WHERE a.path IS NULL
+                """
+            ).fetchone()["count"]
+            if missing:
+                db.execute(
+                    """
+                    DELETE FROM chunks_fts
+                    WHERE chunk_id IN (
+                        SELECT c.id
+                        FROM chunks c
+                        JOIN documents d ON d.id = c.document_id
+                        LEFT JOIN active_paths a ON a.path = d.path
+                        WHERE a.path IS NULL
+                    )
+                    """
+                )
+                db.execute(
+                    "DELETE FROM documents WHERE path NOT IN (SELECT path FROM active_paths)"
+                )
+            return missing
 
     def search(
         self,
