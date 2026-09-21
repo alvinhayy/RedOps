@@ -12,6 +12,20 @@ defaults:
   provenance: preserve source_url, document_path, and evidence references
   secret_policy: credentials, tokens, cookies, keys, and domain exports stay outside the shared corpus
 agents:
+  orchestrator_agent:
+    description: Primary RedOps dispatcher that classifies a task, retrieves evidence, and delegates to one or more niche agents.
+    knowledge: [ad, cloud, container, database, devops, linux, malware, methodology, misc, mobile, network, redteam, reversing, tools, vulnerabilities, web, web3, windows, wireless]
+    inputs: authorized task, written scope, available artifacts, and operator constraints
+    outputs: routing decision, retrieved citations, delegated work plan, and consolidated findings
+    allowed_mcp: [redops-rag]
+    mcp_profile: orchestrator
+    tooling:
+      required: [redops]
+      optional: []
+    fallback: retrieve with the RedOps CLI and return a bounded routing plan without execution
+    guardrails:
+      - Confirm authorization and scope before delegating active work.
+      - Retrieval and routing do not imply permission to execute commands or contact targets.
   ad_agent:
     description: Active Directory, Entra ID/Azure AD, identity attack paths, and BloodHound.
     knowledge:

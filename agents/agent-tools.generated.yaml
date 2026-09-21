@@ -1,6 +1,10 @@
 version: 1
 description: Generated union of registry and skill tooling
 agents:
+  orchestrator_agent:
+    required:
+    - redops
+    optional: []
   ad_agent:
     required:
     - bloodhound-python

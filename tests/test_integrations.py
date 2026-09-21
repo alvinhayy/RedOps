@@ -32,6 +32,7 @@ def test_skill_slash_commands_are_installed_for_supported_clients(tmp_path, monk
         assert (root / "mobile-vuln-hunt.md").exists()
         assert (root / "reverse-engineer.md").exists()
         assert (root / "afl-fuzzing.md").exists()
+        assert "orchestrator" in (root / "redops-rag.md").read_text(encoding="utf-8")
 
 
 def test_skill_repository_commands_are_discovered_and_copied(tmp_path, monkeypatch):

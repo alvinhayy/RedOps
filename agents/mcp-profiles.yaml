@@ -1,5 +1,6 @@
 version: 1
 profiles:
+  orchestrator_agent: [redops-rag]
   ad_agent: [redops-rag, redops-exegol, terminal-bounded]
   windows_redteam_agent: [redops-rag, redops-exegol, terminal-bounded]
   web_agent: [redops-rag, redops-exegol, burp, camoufox, terminal-bounded]

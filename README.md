@@ -98,6 +98,7 @@ optional tools milik skill selalu ikut ke agent pemiliknya:
 <!-- BEGIN GENERATED AGENT TOOLS -->
 | Agent | Required tools (registry + owned skills) | Optional tools (registry + owned skills) |
 |---|---|---|
+| `orchestrator_agent` | `redops` | — |
 | `ad_agent` | `bloodhound-python`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
 | `windows_redteam_agent` | `lolbas`, `powerview`, `seatbelt`, `winpeas` | `mimikatz` |
 | `web_agent` | `burp`, `httpx`, `nmap` | `camoufox`, `ffuf`, `nuclei`, `xsrfprobe` |
@@ -123,6 +124,12 @@ Slash command skill juga ditemukan otomatis oleh `redops install-cli claude` dan
 skill di direktori kerja, `~/.agents`, dan `~/.codex`; tambahkan lokasi lain dengan
 `--skill-path` atau `REDOPS_SKILL_PATHS` (dipisahkan `:` di macOS/Linux). File
 command yang sudah ada tidak ditimpa kecuali memakai `--force`.
+
+`/redops-rag <task>` adalah entry point orchestrator. Command ini mengklasifikasikan
+task ke niche agent paling tepat, mengambil konteks dari MCP `redops-rag`, meminta scope
+tertulis sebelum active testing, lalu mendelegasikan pekerjaan ke specialist agent.
+Ia tidak mengeksekusi target secara langsung; eksekusi tetap menjadi tanggung jawab
+specialist melalui Exegol setelah scope dikonfirmasi.
 
 Tool names are capability requirements; health-check them inside Exegol before use.
 Install only what the approved engagement needs and keep credentials outside the corpus.

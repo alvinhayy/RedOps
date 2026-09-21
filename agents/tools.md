@@ -21,6 +21,7 @@ means the workflow may continue with a documented limitation.
 <!-- BEGIN GENERATED AGENT TOOL MATRIX -->
 | Agent | Required tools (registry + owned skills) | Optional tools (registry + owned skills) |
 |---|---|---|
+| `orchestrator_agent` | `redops` | — |
 | `ad_agent` | `bloodhound-python`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
 | `windows_redteam_agent` | `lolbas`, `powerview`, `seatbelt`, `winpeas` | `mimikatz` |
 | `web_agent` | `burp`, `httpx`, `nmap` | `camoufox`, `ffuf`, `nuclei`, `xsrfprobe` |
@@ -34,6 +35,14 @@ means the workflow may continue with a documented limitation.
 <!-- END GENERATED AGENT TOOL MATRIX -->
 
 ## Profiles
+
+### `orchestrator_agent`
+
+- Required: RedOps CLI and `redops-rag` MCP.
+- Role: classify the task, retrieve cited context, gate authorization, and delegate to
+  the narrowest specialist. It does not execute target commands.
+- Fallback: return a bounded routing plan from local retrieval when the specialist or
+  provider is unavailable.
 
 ### `ad_agent`
 

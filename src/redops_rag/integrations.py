@@ -42,6 +42,15 @@ description: Source-grounded authorized pentest RAG workflow.
 
 """ + INTEGRATION_TEXT
 
+ORCHESTRATOR_COMMAND_TEXT = (
+    "Act as the RedOps orchestrator for $ARGUMENTS. Load the orchestrator_agent profile, "
+    "classify the task into the narrowest niche agent, and retrieve relevant context with "
+    "the redops-rag MCP or `redops query --no-generate`. Confirm written scope before any "
+    "active testing, delegate only to the selected specialist, preserve [S#] citations and "
+    "source URLs, and never claim a command ran without its output. Execution remains "
+    "Exegol-first and belongs to the specialist agent."
+)
+
 
 _COMMAND_NAME = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 
@@ -51,7 +60,14 @@ def _manifest_commands() -> list[dict[str, str]]:
     try:
         data = json.loads(manifest.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return [{"name": "redops-rag", "skill": "redops-rag", "description": "", "content": INTEGRATION_TEXT}]
+        return [
+            {
+                "name": "redops-rag",
+                "skill": "redops-rag",
+                "description": "RedOps orchestrator entry point",
+                "content": ORCHESTRATOR_COMMAND_TEXT,
+            }
+        ]
     commands = data.get("commands", [])
     return [item for item in commands if isinstance(item, dict) and item.get("name") and item.get("content")]
 
@@ -172,11 +188,15 @@ def _frontmatter_field(content: str, field: str) -> str:
 def _slash_commands(skill_paths: Iterable[str | Path] | None = None) -> list[dict[str, str]]:
     """Combine discovered skill commands with the built-in RedOps fallbacks."""
 
-    # A real skill command wins over the short fallback wrapper with the same
-    # name. This lets users install a richer command without editing RedOps.
-    combined = _discover_skill_commands(skill_paths)
+    manifest = _manifest_commands()
+    discovered = _discover_skill_commands(skill_paths)
+    # Built-in commands are canonical when scanning default locations. An
+    # explicit --skill-path/REDOPS_SKILL_PATHS opts into external skill content.
+    external_source = skill_paths is not None or bool(os.getenv("REDOPS_SKILL_PATHS"))
+    combined = discovered if external_source else manifest
     seen = {item["name"] for item in combined}
-    for item in _manifest_commands():
+    additions = manifest if external_source else discovered
+    for item in additions:
         name = str(item.get("name", "")).lower()
         if name and name not in seen:
             item = dict(item)
