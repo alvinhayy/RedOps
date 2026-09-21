@@ -157,6 +157,13 @@ redops stats
 redops query "Bagaimana melakukan enumerasi Active Directory?"
 ```
 
+Untuk menjalankan RedOps memakai provider Z.ai yang sudah dikonfigurasi di OpenCode,
+gunakan wrapper berikut. API key dibaca saat runtime dan tidak ditulis ke repo:
+
+```bash
+./scripts/redops-zai query "ringkas fungsi RedOps" --top-k 3
+```
+
 Variabel `.env` tidak otomatis dimuat oleh aplikasi. Ekspor variabel yang diperlukan,
 atau jalankan dengan alat seperti `dotenv`/Docker Compose. Default aman dan lokal bisa
 langsung dipakai tanpa `.env`.
