@@ -15,6 +15,9 @@ def build_parser() -> argparse.ArgumentParser:
     providers_parser = subparsers.add_parser("providers", help="list supported model providers")
     providers_parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
 
+    status_parser = subparsers.add_parser("status", help="show safe provider/index/runtime status")
+    status_parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+
     install_parser = subparsers.add_parser("install-cli", help="install RedOps adapters for agent CLIs")
     install_parser.add_argument("target", choices=("codex", "claude", "opencode", "all"))
     install_parser.add_argument("--dry-run", action="store_true", help="show paths without writing")
@@ -27,6 +30,12 @@ def build_parser() -> argparse.ArgumentParser:
     query_parser.add_argument("question")
     query_parser.add_argument("--top-k", type=int)
     query_parser.add_argument("--no-generate", action="store_true")
+
+    interactive_parser = subparsers.add_parser(
+        "interactive", aliases=["shell"], help="open an interactive RAG query shell"
+    )
+    interactive_parser.add_argument("--top-k", type=int)
+    interactive_parser.add_argument("--no-generate", action="store_true")
 
     subparsers.add_parser("stats", help="show index statistics")
     serve_parser = subparsers.add_parser("serve", help="run the HTTP API")
@@ -75,6 +84,12 @@ def main() -> None:
             for row in rows:
                 print(f"{row['id']}: {row['name']} ({row['kind']}) — {row['notes']}")
         return
+    if args.command == "status":
+        from .status import collect_status, render_status
+
+        result = collect_status()
+        print(json.dumps(result, indent=2, ensure_ascii=False) if args.json else render_status(result))
+        return
     if args.command == "install-cli":
         from .integrations import install_integrations
 
@@ -109,6 +124,12 @@ def main() -> None:
             print(json.dumps({"error": "invalid_benchmark", "message": str(exc)}, indent=2))
             raise SystemExit(2) from exc
         print(json.dumps(result, indent=2, ensure_ascii=False))
+        return
+
+    if args.command in {"interactive", "shell"}:
+        from .interactive import run_interactive
+
+        run_interactive(top_k=args.top_k, generate=not args.no_generate)
         return
 
     service = RagService()

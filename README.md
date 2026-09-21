@@ -162,6 +162,16 @@ redops stats
 redops query "Bagaimana melakukan enumerasi Active Directory?"
 ```
 
+Lihat status runtime tanpa menampilkan secret, atau gunakan shell interaktif:
+
+```bash
+redops status
+redops interactive
+```
+
+Di shell interaktif, masukkan pertanyaan langsung. Gunakan `/help`, `/status`,
+`/stats`, `/sources`, `/generate`, `/extractive`, atau `/quit`.
+
 Variabel `.env` tidak otomatis dimuat oleh aplikasi. Ekspor variabel yang diperlukan,
 atau jalankan dengan alat seperti `dotenv`/Docker Compose. Default aman dan lokal bisa
 langsung dipakai tanpa `.env`.
