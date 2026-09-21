@@ -45,6 +45,30 @@ description: Source-grounded authorized pentest RAG workflow.
 
 """ + INTEGRATION_TEXT
 
+ENGAGEMENT_WORKFLOW_SKILL_TEXT = """---
+name: engagement-workflow
+description: Phase-gated authorized penetration-testing lifecycle for RedOps.
+---
+
+# RedOps engagement workflow
+
+Use the RedOps phase graph for authorized assessments. Start with pre-engagement
+scope and written authorization, then hand off evidence through information gathering,
+vulnerability assessment, approved exploitation, post-exploitation impact validation,
+lateral-movement validation, proof-of-concept packaging, and post-engagement reporting.
+
+Call the `plan_engagement` tool from the `redops-rag` MCP or run:
+
+```bash
+redops workflow "<authorized task>"
+```
+
+Call `route_task` to select technical niche agents. Active phases remain blocked until
+written scope, exact target allowlists, phase approval, and Exegol/runtime health are
+confirmed. Every handoff includes evidence, source citations, scope, artifacts, and
+open questions. Never include credentials or claim a command ran without output.
+"""
+
 ORCHESTRATOR_COMMAND_TEXT = (
     "Act as the RedOps orchestrator for $ARGUMENTS. First call `plan_engagement` "
     "from the redops-rag MCP (or run `redops workflow`) to create the phase-gated "
@@ -249,6 +273,14 @@ def _skill_file(target: str, root: Path) -> IntegrationFile:
     return IntegrationFile(target, root / "skills" / "redops-rag" / "SKILL.md", CODEX_SKILL_TEXT)
 
 
+def _workflow_skill_file(target: str, root: Path) -> IntegrationFile:
+    return IntegrationFile(
+        target,
+        root / "skills" / "engagement-workflow" / "SKILL.md",
+        ENGAGEMENT_WORKFLOW_SKILL_TEXT,
+    )
+
+
 def integration_files(
     target: str,
     *,
@@ -258,10 +290,10 @@ def integration_files(
     normalized = target.lower()
     if normalized == "codex":
         root = _home("CODEX_HOME", Path.home() / ".codex")
-        return [_skill_file(target, root)]
+        return [_skill_file(target, root), _workflow_skill_file(target, root)]
     if normalized == "claude":
         root = _home("CLAUDE_HOME", Path.home() / ".claude")
-        files = [_skill_file(target, root)]
+        files = [_skill_file(target, root), _workflow_skill_file(target, root)]
         files.extend(
             IntegrationFile(target, root / "commands" / f"{item['name']}.md", item["content"])
             for item in _slash_commands(skill_paths)
@@ -274,12 +306,14 @@ def integration_files(
             for item in _slash_commands(skill_paths)
         ]
         commands.append(_skill_file(target, root))
+        commands.append(_workflow_skill_file(target, root))
         # OpenCode also follows the cross-agent .agents/skills convention.
         commands.append(_skill_file(target, _home("AGENTS_HOME", Path.home() / ".agents")))
+        commands.append(_workflow_skill_file(target, _home("AGENTS_HOME", Path.home() / ".agents")))
         return commands
     if normalized in {"zcode", "cursor", "gemini", "copilot", "windsurf", "amp", "crush"}:
         agents_root = _home("AGENTS_HOME", Path.home() / ".agents")
-        files = [_skill_file(target, agents_root)]
+        files = [_skill_file(target, agents_root), _workflow_skill_file(target, agents_root)]
         commands = _slash_commands(skill_paths)
         if normalized == "zcode":
             files.extend(IntegrationFile(target, agents_root / "commands" / f"{item['name']}.md", item["content"]) for item in commands)
