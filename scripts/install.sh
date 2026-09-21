@@ -158,7 +158,7 @@ fi
 elapsed=$(( $(date +%s) - START_TIME ))
 printf '\n%sRedOps installation complete%s (%ss)\n' "$C_GREEN" "$C_RESET" "$elapsed"
 printf '  CLI       %s/redops\n' "$BIN_DIR"
-printf '  Adapters  Codex · Claude · OpenCode · ZCode · Cursor · Gemini · Copilot · Windsurf\n'
+printf '  Adapters  Codex · Claude · OpenCode · ZCode · Cursor · Gemini · Copilot · Windsurf · Amp · Crush\n'
 printf '  Tools     %s/agent-tools.yaml\n' "$RUNTIME_DIR"
 printf '  MCP       %s/mcp.json\n' "$RUNTIME_DIR"
 printf '  Next      redops status  |  redops interactive\n'
