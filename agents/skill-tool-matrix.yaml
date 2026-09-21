@@ -11,6 +11,7 @@ policy:
 skills:
   mobile-vuln-hunt:
     owner_agents: [mobile_agent]
+    slash_commands: [mobile-vuln-hunt]
     knowledge_niches: [mobile, reversing, vulnerabilities, web, network, methodology]
     executables:
       required: [rg, adb]
@@ -32,6 +33,7 @@ skills:
       - iOS otool/nm/class-dump availability is host/platform dependent and must be checked.
   reverse-engineer:
     owner_agents: [reversing_tools_agent, mobile_agent]
+    slash_commands: [reverse-engineer]
     knowledge_niches: [reversing, malware, mobile, windows, linux, web, vulnerabilities, methodology]
     executables:
       required: [file, strings, find, unzip]
@@ -53,6 +55,7 @@ skills:
       - Skill guidance to show full secrets conflicts with RedOps secret policy; reports must keep secrets private.
   afl-fuzzing:
     owner_agents: [mobile_agent]
+    slash_commands: [afl-fuzzing]
     knowledge_niches: [mobile, reversing, vulnerabilities, tools, methodology]
     executables:
       required: [adb]

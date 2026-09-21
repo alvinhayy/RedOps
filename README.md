@@ -111,6 +111,10 @@ python scripts/sync_agent_tools.py
 python scripts/sync_agent_tools.py --check
 ```
 
+Skill yang memiliki deklarasi `slash_commands` juga dipasang otomatis oleh
+`redops install-cli claude` dan `redops install-cli opencode`. File command yang
+sudah ada tidak ditimpa kecuali memakai `--force`.
+
 Tool names are capability requirements; health-check them inside Exegol before use.
 Install only what the approved engagement needs and keep credentials outside the corpus.
 

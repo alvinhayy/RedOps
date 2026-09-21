@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "description": "Slash commands exposed by RedOps skills for supported CLI clients.",
+  "commands": [
+    {
+      "name": "redops-rag",
+      "skill": "redops-rag",
+      "description": "Source-grounded authorized pentest RAG workflow.",
+      "content": "Use the RedOps RAG skill for this task. Start with retrieval, cite returned source paths/URLs, and never claim a command ran unless its output is present. Keep testing limited to written scope and use `redops exegol exec -- <argv...>` only after authorization and container checks."
+    },
+    {
+      "name": "mobile-vuln-hunt",
+      "skill": "mobile-vuln-hunt",
+      "description": "Authorized Android/iOS vulnerability hunting workflow.",
+      "content": "Load and follow the `mobile-vuln-hunt` skill for this task. Restrict work to authorized Android/iOS artifacts and disposable lab devices; begin with static analysis and cite RedOps knowledge sources."
+    },
+    {
+      "name": "reverse-engineer",
+      "skill": "reverse-engineer",
+      "description": "Static reverse-engineering workflow for authorized artifacts.",
+      "content": "Load and follow the `reverse-engineer` skill for this task. Preserve input hashes, work on copies, and do not execute unknown samples on the host. Use Exegol or bounded tools when runtime analysis is explicitly authorized."
+    },
+    {
+      "name": "afl-fuzzing",
+      "skill": "afl-fuzzing",
+      "description": "Android native-library fuzzing workflow.",
+      "content": "Load and follow the `afl-fuzzing` skill for this task. Fuzz only an authorized disposable Android emulator/device, validate harness reachability with a positive control, and stop when the device or scope is unavailable."
+    }
+  ]
+}

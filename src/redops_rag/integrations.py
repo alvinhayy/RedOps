@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -33,6 +34,15 @@ never in prompts, reports, or the shared corpus.
 """
 
 
+def _slash_commands() -> list[dict[str, str]]:
+    manifest = Path(__file__).resolve().parents[2] / "agents" / "skill-commands.json"
+    try:
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return [{"name": "redops-rag", "skill": "redops-rag", "description": "", "content": INTEGRATION_TEXT}]
+    return data.get("commands", [])
+
+
 @dataclass(frozen=True, slots=True)
 class IntegrationFile:
     target: str
@@ -53,13 +63,18 @@ def integration_files(target: str) -> list[IntegrationFile]:
                                 "---\nname: redops-rag\ndescription: Source-grounded authorized pentest RAG workflow.\n---\n\n" + INTEGRATION_TEXT)]
     if normalized == "claude":
         root = _home("CLAUDE_HOME", Path.home() / ".claude")
-        return [IntegrationFile(target, root / "commands" / "redops-rag.md", INTEGRATION_TEXT)]
+        return [
+            IntegrationFile(target, root / "commands" / f"{item['name']}.md", item["content"])
+            for item in _slash_commands()
+        ]
     if normalized == "opencode":
         root = _home("OPENCODE_HOME", Path.home() / ".config" / "opencode")
-        return [
-            IntegrationFile(target, root / "commands" / "redops-rag.md", INTEGRATION_TEXT),
-            IntegrationFile(target, root / "skills" / "redops-rag" / "SKILL.md", INTEGRATION_TEXT),
+        commands = [
+            IntegrationFile(target, root / "commands" / f"{item['name']}.md", item["content"])
+            for item in _slash_commands()
         ]
+        commands.append(IntegrationFile(target, root / "skills" / "redops-rag" / "SKILL.md", INTEGRATION_TEXT))
+        return commands
     raise ValueError("target must be one of: codex, claude, opencode, all")
 
 
