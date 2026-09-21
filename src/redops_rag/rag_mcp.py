@@ -12,6 +12,7 @@ from typing import Any
 
 from .orchestrator import route_task
 from .service import RagService
+from .workflow import plan_engagement
 
 AUTH_WARNING = "Use only with authorized security-testing knowledge and artifacts."
 TOOLS = [
@@ -59,6 +60,20 @@ TOOLS = [
             "additionalProperties": False,
         },
     },
+    {
+        "name": "plan_engagement",
+        "description": "Build a phase-gated RedOps engagement plan; planning only.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "task": {"type": "string", "minLength": 1},
+                "scope_confirmed": {"type": "boolean", "default": False},
+                "include_active": {"type": "boolean", "default": False},
+            },
+            "required": ["task"],
+            "additionalProperties": False,
+        },
+    },
 ]
 
 
@@ -91,6 +106,12 @@ class RagMcpServer:
                 task = arguments.get("task")
                 limit = arguments.get("limit", 3)
                 payload = route_task(task, limit)
+            elif name == "plan_engagement":
+                payload = plan_engagement(
+                    arguments.get("task"),
+                    scope_confirmed=arguments.get("scope_confirmed", False),
+                    include_active=arguments.get("include_active", False),
+                )
             else:
                 raise ValueError(f"unknown tool: {name}")
             return {"content": [{"type": "text", "text": json.dumps(payload, ensure_ascii=False)}]}

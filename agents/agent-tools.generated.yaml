@@ -5,6 +5,96 @@ agents:
     required:
     - redops
     optional: []
+  scope_agent:
+    required:
+    - redops
+    optional:
+    - jq
+    - markdown-tools
+    - nmap
+    - pandoc
+    - python
+  recon_agent:
+    required:
+    - nmap
+    - redops
+    optional:
+    - httpx
+    - jq
+    - ldapsearch
+    - markdown-tools
+    - netexec
+    - pandoc
+    - python
+    - tshark
+  assessment_agent:
+    required:
+    - redops
+    optional:
+    - jq
+    - markdown-tools
+    - nmap
+    - nuclei
+    - pandoc
+    - python
+    - semgrep
+    - trivy
+  exploitation_agent:
+    required:
+    - redops
+    optional:
+    - jq
+    - markdown-tools
+    - metasploit
+    - nmap
+    - nuclei
+    - pandoc
+    - python
+  post_exploitation_agent:
+    required:
+    - redops
+    optional:
+    - bloodhound-python
+    - jq
+    - linpeas
+    - markdown-tools
+    - netexec
+    - nmap
+    - pandoc
+    - python
+    - seatbelt
+  lateral_movement_agent:
+    required:
+    - nmap
+    - redops
+    optional:
+    - bloodhound-python
+    - impacket
+    - jq
+    - kerbrute
+    - markdown-tools
+    - netexec
+    - pandoc
+    - python
+  poc_agent:
+    required:
+    - redops
+    optional:
+    - curl
+    - jq
+    - markdown-tools
+    - nmap
+    - pandoc
+    - python
+  reporting_agent:
+    required:
+    - markdown-tools
+    - redops
+    optional:
+    - jq
+    - nmap
+    - pandoc
+    - python
   ad_agent:
     required:
     - bloodhound-python

@@ -26,6 +26,118 @@ agents:
     guardrails:
       - Confirm authorization and scope before delegating active work.
       - Retrieval and routing do not imply permission to execute commands or contact targets.
+  scope_agent:
+    description: Pre-engagement scope, authorization, rules-of-engagement, and safety gate.
+    knowledge: [methodology, misc]
+    inputs: written authorization, target inventory, exclusions, timing, and success criteria
+    outputs: signed scope record, rules of engagement, test window, and phase approvals
+    allowed_mcp: [redops-rag]
+    mcp_profile: scope
+    tooling:
+      required: [redops]
+      optional: [jq]
+    fallback: stop and return the missing authorization or scope fields
+    guardrails:
+      - Never contact a target during scope preparation.
+      - Do not infer authorization from a hostname, credential, or artifact alone.
+  recon_agent:
+    description: Phase coordinator for authorized information gathering and asset inventory.
+    knowledge: [network, web, ad, cloud, mobile, methodology, tools]
+    inputs: scope output, asset list, approved artifacts, and rate limits
+    outputs: asset/service/application inventory, evidence references, and open questions
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
+    mcp_profile: recon
+    tooling:
+      required: [redops, nmap]
+      optional: [httpx, netexec, ldapsearch, tshark]
+    fallback: offline artifact and banner analysis
+    guardrails:
+      - Probe only explicitly in-scope assets and obey rate limits.
+      - Discovery never authorizes exploitation or lateral movement.
+  assessment_agent:
+    description: Phase coordinator for vulnerability correlation, triage, and validation planning.
+    knowledge: [vulnerabilities, tools, methodology, linux, windows, web, ad]
+    inputs: recon evidence, source citations, versions, and service artifacts
+    outputs: prioritized hypotheses, severity rationale, validation plan, and evidence gaps
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
+    mcp_profile: assessment
+    tooling:
+      required: [redops]
+      optional: [nmap, nuclei, semgrep, trivy]
+    fallback: source-grounded offline triage
+    guardrails:
+      - A scanner result is a hypothesis until verified against observed evidence.
+      - Do not turn a finding into an exploit action without a separate approval gate.
+  exploitation_agent:
+    description: Phase coordinator for minimal, reversible exploit validation in an approved fixture.
+    knowledge: [vulnerabilities, redteam, tools, methodology]
+    inputs: approved finding, exploit test plan, rollback plan, and Exegol status
+    outputs: reproduction result, command output, impact boundary, and rollback confirmation
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
+    mcp_profile: exploitation
+    tooling:
+      required: [redops]
+      optional: [nmap, metasploit, nuclei]
+    fallback: document why validation was not run; never claim success
+    guardrails:
+      - Exploitation requires explicit approval for the exact target and test.
+      - No persistence, destructive payload, denial of service, or unbounded scanning.
+  post_exploitation_agent:
+    description: Phase coordinator for impact measurement, minimum evidence, and cleanup.
+    knowledge: [redteam, ad, cloud, windows, linux, methodology]
+    inputs: validated access, approved test account, impact questions, and cleanup plan
+    outputs: impact evidence, access boundary, cleanup record, and residual risks
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
+    mcp_profile: post-exploitation
+    tooling:
+      required: [redops]
+      optional: [bloodhound-python, netexec, seatbelt, linpeas]
+    fallback: analyze existing artifacts without collecting new target data
+    guardrails:
+      - Collect the minimum data needed to prove impact; never dump bulk credentials.
+      - Cleanup must be recorded and must not destroy legitimate logs or evidence.
+  lateral_movement_agent:
+    description: Phase coordinator for approved network, identity, and segmentation path validation.
+    knowledge: [ad, network, windows, cloud, methodology, tools]
+    inputs: movement scope, source access, destination allowlist, and change window
+    outputs: path evidence, segmentation result, credentials exposure boundary, and remediation
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
+    mcp_profile: lateral-movement
+    tooling:
+      required: [redops, nmap]
+      optional: [bloodhound-python, netexec, impacket, kerbrute]
+    fallback: graph and PCAP analysis without live movement
+    guardrails:
+      - Both source and destination must be explicitly in scope.
+      - No password spraying, persistence, or cross-tenant movement without separate approval.
+  poc_agent:
+    description: Phase coordinator for minimal reproducible, sanitized proof-of-concept packaging.
+    knowledge: [vulnerabilities, methodology, tools]
+    inputs: validated evidence, reproduction output, target fixture, and impact statement
+    outputs: minimal PoC, sanitized output, reproduction status, and limitations
+    allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
+    mcp_profile: poc
+    tooling:
+      required: [redops]
+      optional: [python, curl, jq]
+    fallback: a dry-run reproduction and evidence-only report
+    guardrails:
+      - PoCs must be fixture-only, reversible, rate-limited, and non-destructive.
+      - Secrets, tokens, and production identifiers must be redacted before handoff.
+  reporting_agent:
+    description: Post-engagement coordinator for findings, remediation, residual risk, and closure.
+    knowledge: [methodology, vulnerabilities, misc]
+    inputs: phase outputs, source citations, cleanup record, and stakeholder requirements
+    outputs: Markdown report, machine-readable findings, remediation plan, and closure checklist
+    allowed_mcp: [redops-rag, terminal-bounded]
+    mcp_profile: reporting
+    tooling:
+      required: [redops, markdown-tools]
+      optional: [jq, pandoc]
+    fallback: Markdown report with explicit evidence gaps
+    guardrails:
+      - Separate observed evidence, hypotheses, and untested assumptions.
+      - Do not include credentials, tokens, cookies, private keys, or raw identity exports.
   ad_agent:
     description: Active Directory, Entra ID/Azure AD, identity attack paths, and BloodHound.
     knowledge:

@@ -63,6 +63,19 @@ def build_parser() -> argparse.ArgumentParser:
     orchestrate_parser.add_argument("task")
     orchestrate_parser.add_argument("--limit", type=int, default=3)
 
+    workflow_parser = subparsers.add_parser(
+        "workflow", help="plan the phase-gated penetration-testing workflow"
+    )
+    workflow_parser.add_argument("task")
+    workflow_parser.add_argument(
+        "--scope-confirmed", action="store_true", help="mark written scope as confirmed"
+    )
+    workflow_parser.add_argument(
+        "--include-active",
+        action="store_true",
+        help="plan active phases after explicit scope confirmation",
+    )
+
     interactive_parser = subparsers.add_parser(
         "interactive", aliases=["shell"], help="open an interactive RAG query shell"
     )
@@ -157,6 +170,20 @@ def main() -> None:
         except ValueError as exc:
             print(json.dumps({"error": "invalid_task", "message": str(exc)}))
             raise SystemExit(2) from exc
+        return
+    if args.command == "workflow":
+        from .workflow import plan_engagement
+
+        try:
+            result = plan_engagement(
+                args.task,
+                scope_confirmed=args.scope_confirmed,
+                include_active=args.include_active,
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": "invalid_workflow", "message": str(exc)}))
+            raise SystemExit(2) from exc
+        print(json.dumps(result, indent=2, ensure_ascii=False))
         return
     if args.command == "exegol":
         try:

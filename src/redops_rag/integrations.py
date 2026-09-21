@@ -22,9 +22,12 @@ redops providers
 redops stats
 redops query \"<question>\"
 redops query \"<question>\" --no-generate
+redops workflow \"<authorized task>\"
+redops orchestrate \"<authorized task>\"
 redops exegol status
 ```
 
+Use `redops workflow` to plan the phase-gated lifecycle before routing niche agents.
 Use `redops exegol exec -- <argv...>` only after confirming written scope and
 the configured Exegol container. Keep active web/mobile/WAF checks to approved
 local, staging, or lab targets; do not submit destructive payloads or create
@@ -43,14 +46,17 @@ description: Source-grounded authorized pentest RAG workflow.
 """ + INTEGRATION_TEXT
 
 ORCHESTRATOR_COMMAND_TEXT = (
-    "Act as the RedOps orchestrator for $ARGUMENTS. First call the `route_task` tool "
-    "from the redops-rag MCP (or run `redops orchestrate`), load the returned agent "
-    "profile, and delegate to every selected specialist using the provider's native "
-    "agent/task mechanism. Retrieve context with `search_knowledge`/`search_writeups` "
-    "before delegation. Confirm written scope before any active testing, pass each "
-    "specialist only its scoped evidence and delegation contract, preserve [S#] "
-    "citations and source URLs, and never claim a command ran without its output. "
-    "Execution remains Exegol-first and belongs to the specialist agent."
+    "Act as the RedOps orchestrator for $ARGUMENTS. First call `plan_engagement` "
+    "from the redops-rag MCP (or run `redops workflow`) to create the phase-gated "
+    "lifecycle: pre-engagement, information gathering, vulnerability assessment, "
+    "exploitation, post-exploitation, lateral movement, proof-of-concept, and "
+    "post-engagement. Then call `route_task` for niche specialists, retrieve context "
+    "with `search_knowledge`/`search_writeups`, and delegate each phase to the matching "
+    "phase agent and niche agent using the provider's native agent/task mechanism. "
+    "Stop active phases until written scope and exact approval are confirmed. Pass each "
+    "worker only its scoped evidence and handoff contract, preserve [S#] citations and "
+    "source URLs, and never claim a command ran without its output. Execution remains "
+    "Exegol-first and belongs to the approved phase specialist."
 )
 
 

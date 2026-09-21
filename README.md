@@ -99,6 +99,14 @@ optional tools milik skill selalu ikut ke agent pemiliknya:
 | Agent | Required tools (registry + owned skills) | Optional tools (registry + owned skills) |
 |---|---|---|
 | `orchestrator_agent` | `redops` | — |
+| `scope_agent` | `redops` | `jq`, `markdown-tools`, `nmap`, `pandoc`, `python` |
+| `recon_agent` | `nmap`, `redops` | `httpx`, `jq`, `ldapsearch`, `markdown-tools`, `netexec`, `pandoc`, `python`, `tshark` |
+| `assessment_agent` | `redops` | `jq`, `markdown-tools`, `nmap`, `nuclei`, `pandoc`, `python`, `semgrep`, `trivy` |
+| `exploitation_agent` | `redops` | `jq`, `markdown-tools`, `metasploit`, `nmap`, `nuclei`, `pandoc`, `python` |
+| `post_exploitation_agent` | `redops` | `bloodhound-python`, `jq`, `linpeas`, `markdown-tools`, `netexec`, `nmap`, `pandoc`, `python`, `seatbelt` |
+| `lateral_movement_agent` | `nmap`, `redops` | `bloodhound-python`, `impacket`, `jq`, `kerbrute`, `markdown-tools`, `netexec`, `pandoc`, `python` |
+| `poc_agent` | `redops` | `curl`, `jq`, `markdown-tools`, `nmap`, `pandoc`, `python` |
+| `reporting_agent` | `markdown-tools`, `redops` | `jq`, `nmap`, `pandoc`, `python` |
 | `ad_agent` | `bloodhound-python`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
 | `windows_redteam_agent` | `lolbas`, `powerview`, `seatbelt`, `winpeas` | `mimikatz` |
 | `web_agent` | `burp`, `httpx`, `nmap` | `camoufox`, `ffuf`, `nuclei`, `xsrfprobe` |
@@ -125,11 +133,26 @@ skill di direktori kerja, `~/.agents`, dan `~/.codex`; tambahkan lokasi lain den
 `--skill-path` atau `REDOPS_SKILL_PATHS` (dipisahkan `:` di macOS/Linux). File
 command yang sudah ada tidak ditimpa kecuali memakai `--force`.
 
+Skill `engagement-workflow` menyediakan slash command `/engagement-workflow` untuk
+meminta phase plan tanpa menjalankan target. Ia menggunakan agent fase (`scope`, `recon`,
+`assessment`, `exploitation`, `post-exploitation`, `lateral-movement`, `poc`, dan
+`reporting`) yang didefinisikan di `agents/workflow.yaml`.
+
 `/redops-rag <task>` adalah entry point orchestrator. Command ini mengklasifikasikan
-task ke niche agent paling tepat, mengambil konteks dari MCP `redops-rag`, meminta scope
-tertulis sebelum active testing, lalu mendelegasikan pekerjaan ke specialist agent.
+task ke niche agent paling tepat, membuat phase plan dari pre-engagement sampai
+post-engagement, mengambil konteks dari MCP `redops-rag`, meminta scope tertulis sebelum
+active testing, lalu mendelegasikan pekerjaan ke phase agent dan specialist agent.
+Diagram dan machine-readable workflow tersedia di [`agents/workflow.yaml`](agents/workflow.yaml).
+Visual flow dan handoff contract tersedia di [`docs/pentest-workflow.md`](docs/pentest-workflow.md).
 Ia tidak mengeksekusi target secara langsung; eksekusi tetap menjadi tanggung jawab
-specialist melalui Exegol setelah scope dikonfirmasi.
+specialist melalui Exegol setelah scope dan approval fase dikonfirmasi.
+
+Workflow dapat diuji tanpa menyentuh target:
+
+```bash
+redops workflow "assess a Linux server"
+redops orchestrate "audit an Active Directory domain"
+```
 
 Tool names are capability requirements; health-check them inside Exegol before use.
 Install only what the approved engagement needs and keep credentials outside the corpus.
@@ -282,9 +305,10 @@ di `knowledge/` dan corpus writeup di `writeups/`. Jalankan melalui stdio:
 redops rag-mcp
 ```
 
-Tool yang tersedia adalah `route_task`, `search_knowledge`, `search_writeups`, dan
-`knowledge_stats`. `route_task` hanya menghasilkan delegation plan berdasarkan agent
-registry; provider CLI-lah yang menjalankan delegation ke specialist agent.
+Tool yang tersedia adalah `plan_engagement`, `route_task`, `search_knowledge`,
+`search_writeups`, dan `knowledge_stats`. `plan_engagement` dan `route_task` hanya
+menghasilkan phase/delegation plan; provider CLI-lah yang menjalankan delegation ke
+phase dan niche specialist agent.
 MCP ini hanya mengambil sumber yang sudah diindeks dan mengembalikan provenance RedOps;
 ia tidak dapat menjalankan Exegol, mengubah target, atau membaca API key. Setelah menambah
 atau membersihkan Markdown, rebuild index:

@@ -4,6 +4,8 @@ from __future__ import annotations
 import re
 from dataclasses import asdict, dataclass
 
+from .workflow import plan_engagement
+
 
 @dataclass(frozen=True, slots=True)
 class AgentRoute:
@@ -121,6 +123,7 @@ def route_task(task: str, limit: int = 3) -> dict[str, object]:
         ]
     return {
         "task": normalized,
+        "workflow": plan_engagement(normalized),
         "authorization_required": True,
         "execution_policy": "orchestrator routes only; specialist executes via Exegol after scope confirmation",
         "selected_agents": [asdict(item) for item in selected],

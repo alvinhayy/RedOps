@@ -22,6 +22,14 @@ means the workflow may continue with a documented limitation.
 | Agent | Required tools (registry + owned skills) | Optional tools (registry + owned skills) |
 |---|---|---|
 | `orchestrator_agent` | `redops` | — |
+| `scope_agent` | `redops` | `jq`, `markdown-tools`, `nmap`, `pandoc`, `python` |
+| `recon_agent` | `nmap`, `redops` | `httpx`, `jq`, `ldapsearch`, `markdown-tools`, `netexec`, `pandoc`, `python`, `tshark` |
+| `assessment_agent` | `redops` | `jq`, `markdown-tools`, `nmap`, `nuclei`, `pandoc`, `python`, `semgrep`, `trivy` |
+| `exploitation_agent` | `redops` | `jq`, `markdown-tools`, `metasploit`, `nmap`, `nuclei`, `pandoc`, `python` |
+| `post_exploitation_agent` | `redops` | `bloodhound-python`, `jq`, `linpeas`, `markdown-tools`, `netexec`, `nmap`, `pandoc`, `python`, `seatbelt` |
+| `lateral_movement_agent` | `nmap`, `redops` | `bloodhound-python`, `impacket`, `jq`, `kerbrute`, `markdown-tools`, `netexec`, `pandoc`, `python` |
+| `poc_agent` | `redops` | `curl`, `jq`, `markdown-tools`, `nmap`, `pandoc`, `python` |
+| `reporting_agent` | `markdown-tools`, `redops` | `jq`, `nmap`, `pandoc`, `python` |
 | `ad_agent` | `bloodhound-python`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
 | `windows_redteam_agent` | `lolbas`, `powerview`, `seatbelt`, `winpeas` | `mimikatz` |
 | `web_agent` | `burp`, `httpx`, `nmap` | `camoufox`, `ffuf`, `nuclei`, `xsrfprobe` |

@@ -1,0 +1,82 @@
+version: 1
+name: redops-engagement-workflow
+description: >-
+  Phase-gated penetration-testing workflow matching the RedOps engagement diagram.
+  Phase agents coordinate handoffs; niche agents perform the technical work.
+policy:
+  authorization: written authorization and explicitly in-scope targets are mandatory
+  active_execution: scope_confirmed plus explicit phase approval plus Exegol/runtime health
+  evidence: every handoff preserves source citations, target scope, artifacts, and open questions
+  secrets: credentials, tokens, cookies, keys, and raw identity exports stay private
+phases:
+  pre_engagement:
+    agent: scope_agent
+    purpose: Confirm authorization, targets, exclusions, timing, and success criteria.
+    knowledge: [methodology, misc]
+    required_artifacts: [written_scope, target_inventory, rules_of_engagement]
+    gate: written authorization and in-scope target
+    next: [information_gathering]
+  information_gathering:
+    agent: recon_agent
+    purpose: Build an evidence-backed asset, identity, service, and application inventory.
+    knowledge: [network, web, ad, cloud, mobile, methodology, tools]
+    required_artifacts: [scope_reference, asset_inventory, service_or_artifact_evidence]
+    gate: accepted scope output and rate limits
+    next: [vulnerability_assessment, post_exploitation]
+  vulnerability_assessment:
+    agent: assessment_agent
+    purpose: Correlate observations with vulnerabilities, misconfigurations, and hypotheses.
+    knowledge: [vulnerabilities, tools, methodology, linux, windows, web, ad]
+    required_artifacts: [recon_evidence, finding_hypotheses, severity_rationale]
+    gate: source plus observed evidence for each hypothesis
+    next: [information_gathering, exploitation, post_exploitation]
+  exploitation:
+    agent: exploitation_agent
+    purpose: Perform minimal, reversible validation of an approved vulnerability.
+    knowledge: [vulnerabilities, redteam, tools, methodology]
+    required_artifacts: [approved_finding, exploit_test_plan, rollback_plan]
+    gate: explicit exploit approval and Exegol/runtime health
+    next: [post_exploitation, lateral_movement]
+  post_exploitation:
+    agent: post_exploitation_agent
+    purpose: Measure impact, collect minimum evidence, and preserve rollback state.
+    knowledge: [redteam, ad, cloud, windows, linux, methodology]
+    required_artifacts: [validated_access, impact_evidence, cleanup_record]
+    gate: approved test accounts and minimum necessary data
+    next: [information_gathering, lateral_movement, proof_of_concept]
+  lateral_movement:
+    agent: lateral_movement_agent
+    purpose: Validate approved movement paths and segmentation controls.
+    knowledge: [ad, network, windows, cloud, methodology, tools]
+    required_artifacts: [movement_scope, source_access, destination_allowlist]
+    gate: source and destination both explicitly in scope
+    next: [vulnerability_assessment, post_exploitation, proof_of_concept]
+  proof_of_concept:
+    agent: poc_agent
+    purpose: Reduce validated behavior to a minimal reproducible, sanitized proof.
+    knowledge: [vulnerabilities, methodology, tools]
+    required_artifacts: [reproduction_steps, sanitized_output, impact_statement]
+    gate: fixture-only, reversible, non-destructive reproduction
+    next: [post_engagement]
+  post_engagement:
+    agent: reporting_agent
+    purpose: Consolidate evidence, remediation, residual risk, and cleanup confirmation.
+    knowledge: [methodology, vulnerabilities, misc]
+    required_artifacts: [finding_records, source_citations, remediation, cleanup_record]
+    gate: observed evidence distinguished from hypotheses
+    next: []
+transitions:
+  - [pre_engagement, information_gathering]
+  - [information_gathering, vulnerability_assessment]
+  - [vulnerability_assessment, information_gathering]
+  - [vulnerability_assessment, exploitation]
+  - [vulnerability_assessment, post_exploitation]
+  - [exploitation, post_exploitation]
+  - [exploitation, lateral_movement]
+  - [post_exploitation, information_gathering]
+  - [post_exploitation, lateral_movement]
+  - [post_exploitation, proof_of_concept]
+  - [lateral_movement, vulnerability_assessment]
+  - [lateral_movement, post_exploitation]
+  - [lateral_movement, proof_of_concept]
+  - [proof_of_concept, post_engagement]

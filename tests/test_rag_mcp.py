@@ -28,6 +28,7 @@ def test_rag_mcp_searches_each_corpus():
         "search_writeups",
         "knowledge_stats",
         "route_task",
+        "plan_engagement",
     }
     result = server.call_tool("search_writeups", {"query": "case", "n_results": 3})
     assert json.loads(result["content"][0]["text"])["sources"][0]["corpus"] == "writeups"
@@ -46,3 +47,13 @@ def test_rag_mcp_routes_to_specialist_agent():
     payload = json.loads(result["content"][0]["text"])
     assert payload["selected_agents"][0]["agent"] == "mobile_agent"
     assert payload["authorization_required"] is True
+
+
+def test_rag_mcp_plans_phase_gates():
+    result = RagMcpServer(FakeService()).call_tool(
+        "plan_engagement", {"task": "test a Windows Server", "scope_confirmed": False}
+    )
+    payload = json.loads(result["content"][0]["text"])
+    phases = {phase["id"]: phase for phase in payload["phases"]}
+    assert phases["pre_engagement"]["status"] == "required"
+    assert phases["exploitation"]["status"] == "blocked_until_scope_and_approval"

@@ -20,6 +20,12 @@ the private engagement workspace—not in `knowledge/` or agent configuration.
 
 ## Profiles and real corpus mapping
 
+The engagement lifecycle is phase-gated by `scope_agent`, `recon_agent`,
+`assessment_agent`, `exploitation_agent`, `post_exploitation_agent`,
+`lateral_movement_agent`, `poc_agent`, and `reporting_agent`. These phase agents
+coordinate handoffs around the technical niche profiles below; they do not replace
+the niche agents.
+
 | Agent | Primary knowledge niches | Specialist connectors |
 |---|---|---|
 | `ad_agent` | `ad/`, `windows/`, `database/`, `methodology/`, `tools/` | Exegol, BloodHound, bounded terminal |
@@ -32,6 +38,10 @@ the private engagement workspace—not in `knowledge/` or agent configuration.
 | `container_devops_agent` | `container/`, `devops/`, `cloud/`, `linux/`, `vulnerabilities/` | Exegol, bounded terminal |
 | `web3_agent` | `web3/`, `web/`, `vulnerabilities/`, `reversing/`, `network/` | Exegol, Burp, Ghidra, radare2 |
 | `rag_curator_agent` | all direct `knowledge/*` niches | bounded terminal only |
+
+The phase graph, required artifacts, and allowed transitions are defined in
+[`workflow.yaml`](workflow.yaml). A phase can be blocked even when a niche agent is
+available; availability is not authorization.
 
 The mapping reflects the current repository layout: categories are direct children of
 `knowledge/`, with mobile-specific subdirectories. `misc/` is intentionally not a
@@ -61,7 +71,11 @@ outputs additionally include manifest/provenance and index QA results.
 Tool requirements: [`tools.md`](tools.md). Machine-readable MCP profiles:
 [`mcp-profiles.yaml`](mcp-profiles.yaml).
 
-Individual profiles: [AD](ad.md), [Windows/red team](windows-redteam.md),
+Phase profiles: [Scope](scope.md), [Recon](recon.md), [Assessment](assessment.md),
+[Exploitation](exploitation.md), [Post-exploitation](post-exploitation.md),
+[Lateral movement](lateral-movement.md), [PoC](poc.md), and [Reporting](reporting.md).
+
+Niche profiles: [AD](ad.md), [Windows/red team](windows-redteam.md),
 [Web](web.md), [Cloud](cloud.md), [Mobile](mobile.md), [Reversing](reversing-tools.md),
 [Network](network.md), [Container/DevOps](container-devops.md), [Web3](web3.md),
 and [RAG curator](rag-curator.md).

@@ -5,7 +5,7 @@ not installed or started automatically.
 
 | Connector | Role | Policy |
 |---|---|---|
-| `redops-rag` | Read-only retrieval and specialist-agent routing | Source-grounded corpus only; no execution |
+| `redops-rag` | Read-only phase planning, retrieval, and specialist-agent routing | Source-grounded corpus only; no execution |
 | `redops-exegol` | Isolated pentest tools | Default execution backend |
 | `burp` | Authorized HTTP(S) proxy/intercept | Only in-scope traffic |
 | `camoufox` | Scoped browser automation | Only approved flows |

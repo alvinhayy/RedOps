@@ -6,7 +6,13 @@
       "name": "redops-rag",
       "skill": "redops-rag",
       "description": "Route an authorized task through the RedOps orchestrator and source-grounded RAG.",
-      "content": "Act as the RedOps orchestrator for $ARGUMENTS. First call the `route_task` tool from the redops-rag MCP (or run `redops orchestrate`), load the returned agent profile, and delegate to every selected specialist using the provider's native agent/task mechanism. Retrieve context with `search_knowledge`/`search_writeups` before delegation. Confirm written scope before any active testing, pass each specialist only its scoped evidence and delegation contract, preserve [S#] citations and source URLs, and never claim a command ran without its output. Execution remains Exegol-first and belongs to the specialist agent."
+      "content": "Act as the RedOps orchestrator for $ARGUMENTS. First call `plan_engagement` from the redops-rag MCP (or run `redops workflow`) to create the phase-gated lifecycle: pre-engagement, information gathering, vulnerability assessment, exploitation, post-exploitation, lateral movement, proof-of-concept, and post-engagement. Then call `route_task` for niche specialists, retrieve context with `search_knowledge`/`search_writeups`, and delegate each phase to the matching phase agent and niche agent using the provider's native agent/task mechanism. Stop active phases until written scope and exact approval are confirmed. Pass each worker only its scoped evidence and handoff contract, preserve [S#] citations and source URLs, and never claim a command ran without its output. Execution remains Exegol-first and belongs to the approved phase specialist."
+    },
+    {
+      "name": "engagement-workflow",
+      "skill": "engagement-workflow",
+      "description": "Build a phase-gated RedOps engagement plan for an authorized task.",
+      "content": "Use the `engagement-workflow` skill. Call `plan_engagement` first, then `route_task` for niche agents. Keep exploitation, post-exploitation, and lateral movement blocked until written scope and exact approval are confirmed. Preserve source citations and handoff artifacts; never claim execution without command output. Task: $ARGUMENTS"
     },
     {
       "name": "mobile-vuln-hunt",

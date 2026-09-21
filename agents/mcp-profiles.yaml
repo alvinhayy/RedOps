@@ -1,6 +1,14 @@
 version: 1
 profiles:
   orchestrator_agent: [redops-rag]
+  scope_agent: [redops-rag]
+  recon_agent: [redops-rag, redops-exegol, terminal-bounded]
+  assessment_agent: [redops-rag, redops-exegol, terminal-bounded]
+  exploitation_agent: [redops-rag, redops-exegol, terminal-bounded]
+  post_exploitation_agent: [redops-rag, redops-exegol, terminal-bounded]
+  lateral_movement_agent: [redops-rag, redops-exegol, terminal-bounded]
+  poc_agent: [redops-rag, redops-exegol, terminal-bounded]
+  reporting_agent: [redops-rag, terminal-bounded]
   ad_agent: [redops-rag, redops-exegol, terminal-bounded]
   windows_redteam_agent: [redops-rag, redops-exegol, terminal-bounded]
   web_agent: [redops-rag, redops-exegol, burp, camoufox, terminal-bounded]

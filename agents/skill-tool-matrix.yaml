@@ -9,6 +9,34 @@ policy:
   availability: tool names are capabilities; verify them in the selected runtime before use
   gaps: missing optional tools are reported, never installed automatically or made mandatory
 skills:
+  engagement-workflow:
+    owner_agents:
+      - scope_agent
+      - recon_agent
+      - assessment_agent
+      - exploitation_agent
+      - post_exploitation_agent
+      - lateral_movement_agent
+      - poc_agent
+      - reporting_agent
+    slash_commands: [engagement-workflow]
+    knowledge_niches: [methodology, vulnerabilities, tools, network, ad, web, cloud, linux, windows]
+    executables:
+      required: [redops]
+      optional: [nmap, python, jq, markdown-tools, pandoc]
+    mcp:
+      required: [redops-rag]
+      optional: [redops-exegol, terminal-bounded]
+    health_checks:
+      - "redops workflow --help"
+      - "redops exegol status"
+      - "MCP health/capabilities for redops-rag and redops-exegol"
+    fallback: >-
+      Produce a read-only phase plan and stop at the missing authorization, scope,
+      evidence, or runtime capability gate.
+    gaps:
+      - Phase planning does not grant authorization or execute target commands.
+
   mobile-vuln-hunt:
     owner_agents: [mobile_agent]
     slash_commands: [mobile-vuln-hunt]
