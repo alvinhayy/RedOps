@@ -52,6 +52,11 @@ See [herdr.dev](https://herdr.dev/) for installation and session management.
 ├── herdr/                     # workspace/session conventions (runtime state stays private)
 ├── knowledge/                 # canonical niche-organized RAG corpus
 │   └── api/                   # optional user-added corpus; excluded by default
+├── knowledgebase/              # compact Makima-compatible source/topic index
+│   ├── INDEX.md
+│   ├── PayloadsAllTheThings/
+│   ├── InternalAllTheThings/
+│   └── HackerRecipes/
 ├── precompiled-binaries/      # manifest only; binaries are supplied by Exegol
 ├── skills/                    # reusable RedOps skills and slash-command sources
 └── src/redops_rag/            # CLI, RAG, workflow, router and MCP adapters

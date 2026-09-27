@@ -9,6 +9,10 @@
       "path": "./knowledge",
       "description": "Niche-organized RedOps knowledge. Do not traverse knowledge/api: the book-derived API archive is intentionally excluded. Prefer the source-grounded RAG MCP when available."
     },
+    "knowledgebase-index": {
+      "path": "./knowledgebase/INDEX.md",
+      "description": "Makima-compatible topic and source namespace map for routing agents to the niche corpus."
+    },
     "redops-writeups": {
       "path": "./writeups",
       "description": "Sanitized engagement writeups and lab evidence; never store credentials or raw loot here."

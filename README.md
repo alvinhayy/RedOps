@@ -48,6 +48,21 @@ RedOps merencanakan, mengambil knowledge bersitasi, merutekan agent, dan memveri
 handoff—bukan menjalankan target secara langsung. Detail layer ada di
 [`docs/architecture.md`](docs/architecture.md).
 
+Layout workspace dibuat ringkas seperti Makima:
+
+```text
+/workspace/
+├── AGENTS.md
+├── README.md
+├── .opencode/              # config, agent prompts, commands, skills
+├── knowledgebase/           # INDEX + source/topic reference namespaces
+├── precompiled-binaries/    # resources supplied by Exegol
+└── engagements/<box-name>/  # notes.md and per-machine artifacts
+```
+
+Corpus aktif tetap niche-organized di `knowledge/` agar ingestion dan provenance
+tidak berubah; `knowledgebase/INDEX.md` adalah peta ringkas yang dipakai agent.
+
 ## Features
 
 - ingestion Markdown yang idempotent dan heading-aware;
