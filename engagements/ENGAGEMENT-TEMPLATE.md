@@ -3,7 +3,7 @@
 Complete every field with the client/operator BEFORE any active phase begins.
 An active phase may start only when this packet is fully signed and its
 phase-specific approval line is filled. Methodology framing follows:
-[S1] knowledge/methodology/pentesting-methodology.md — https://hacktricks.wiki/generic-methodologies-and-resources/pentesting-methodology.html
+[S1] knowledgebase/niches/methodology/pentesting-methodology.md — https://hacktricks.wiki/generic-methodologies-and-resources/pentesting-methodology.html
 
 > Secret policy: this packet contains NO credential fields. Credentials and
 > tokens are exchanged out-of-band only and never stored in engagement

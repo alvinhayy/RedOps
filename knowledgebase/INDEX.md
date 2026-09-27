@@ -1,35 +1,20 @@
-# RedOps Knowledgebase Index
+# Knowledgebase index
 
-Reference map for the OpenCode agents. The active RedOps corpus remains in
-`../knowledge/`, organized by pentest niche (`ad`, `web`, `linux`, `windows`,
-`mobile`, `cloud`, `network`, `web3`, and others). `redops ingest` indexes that
-niche tree; this file is only the quick navigation layer used by agents.
+The canonical Markdown corpus is [`niches/`](niches/). Pick a niche first and open relevant files. Each document retains its original `source_url`. Source-family directories are maps, not duplicate copies.
 
-## Reference namespaces
-
-- `PayloadsAllTheThings/` — web/API payload and exploitation reference map.
-- `InternalAllTheThings/` — Active Directory, Windows/Linux privilege escalation,
-  persistence, pivoting, and internal-network reference map.
-- `HackerRecipes/` — theory, methodology, and service walkthrough reference map.
-
-Each namespace README points to the corresponding niche paths and source URLs. Do
-not duplicate the corpus here. The optional user-added `../knowledge/api/` archive
-is excluded from the active index by default.
-
-## Specialist routing
-
-| Task | Active niche paths |
+| Task | Niche directory |
 |---|---|
-| Web/API | `../knowledge/web`, `../knowledge/vulnerabilities` |
-| AD/Windows | `../knowledge/ad`, `../knowledge/windows`, `../knowledge/redteam` |
-| Linux | `../knowledge/linux`, `../knowledge/container` |
-| Mobile/reversing | `../knowledge/mobile`, `../knowledge/reversing` |
-| Cloud/DevOps | `../knowledge/cloud`, `../knowledge/devops`, `../knowledge/container` |
-| Network/pivoting | `../knowledge/network`, `../knowledge/wireless` |
-| Web3 | `../knowledge/web3`, `../knowledge/reversing` |
+| Active Directory | [`niches/ad/`](niches/ad/) |
+| Windows privilege escalation | [`niches/windows/`](niches/windows/) |
+| Linux server | [`niches/linux/`](niches/linux/) |
+| Web and API | [`niches/web/`](niches/web/), [`niches/vulnerabilities/`](niches/vulnerabilities/) |
+| Mobile | [`niches/mobile/`](niches/mobile/) |
+| Reversing | [`niches/reversing/`](niches/reversing/) |
+| Cloud / containers | [`niches/cloud/`](niches/cloud/), [`niches/container/`](niches/container/) |
+| Network / pivoting | [`niches/network/`](niches/network/) |
+| Web3 | [`niches/web3/`](niches/web3/) |
+| Red-team methodology | [`niches/redteam/`](niches/redteam/) |
 
-Refresh the active index after source changes:
+Source-family maps: [`PayloadsAllTheThings/`](PayloadsAllTheThings/), [`InternalAllTheThings/`](InternalAllTheThings/), and [`HackerRecipes/`](HackerRecipes/). These point into the niche corpus and do not determine storage category.
 
-```text
-redops ingest → data/redops.db → RAG/OpenCode retrieval
-```
+`niches/api/` is optional user-provided book material excluded from Git. Opt it into an engagement explicitly.

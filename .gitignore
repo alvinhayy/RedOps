@@ -15,7 +15,8 @@ data/*.db
 data/*.db-*
 *.sqlite
 *.sqlite3
-knowledge/api/
+knowledgebase/niches/api/
+data/
 docs/lab-observations/
 engagements/*
 !engagements/README.md

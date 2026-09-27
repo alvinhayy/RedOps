@@ -2,24 +2,18 @@
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "redops",
   "skills": {
-    "paths": [".opencode/skill"]
+    "paths": [
+      ".opencode/skill"
+    ]
   },
   "references": {
-    "redops-knowledge": {
-      "path": "./knowledge",
-      "description": "Niche-organized RedOps knowledge. Do not traverse knowledge/api: the book-derived API archive is intentionally excluded. Prefer the source-grounded RAG MCP when available."
-    },
     "knowledgebase-index": {
       "path": "./knowledgebase/INDEX.md",
-      "description": "Makima-compatible topic and source namespace map for routing agents to the niche corpus."
+      "description": "Read first; routes tasks to niche knowledge and source references."
     },
-    "redops-writeups": {
-      "path": "./writeups",
-      "description": "Sanitized engagement writeups and lab evidence; never store credentials or raw loot here."
-    },
-    "redops-agents": {
-      "path": "./agents",
-      "description": "Capability registry, MCP/tool policy, and specialist routing metadata."
+    "knowledgebase-niches": {
+      "path": "./knowledgebase/niches",
+      "description": "Canonical niche-organized Markdown knowledge with per-document source URLs."
     },
     "engagement-ledger": {
       "path": "./engagements",
@@ -32,5 +26,16 @@
     "webfetch": "allow",
     "websearch": "allow",
     "external_directory": "allow"
+  },
+  "mcp": {
+    "exegol": {
+      "type": "local",
+      "command": [
+        "exegol-mcp",
+        "--type",
+        "stdio"
+      ],
+      "enabled": true
+    }
   }
 }

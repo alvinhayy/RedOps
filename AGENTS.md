@@ -1,39 +1,9 @@
-# RedOps agent contract
+# RedOps workspace contract
 
-RedOps is the orchestrator inside a layered authorized-testing workspace:
+RedOps is the OpenCode orchestrator inside Exegol (tools) → Herdr (sessions) → OpenCode (AI harness).
 
-```text
-Exegol (tools, binaries, knowledge runtime)
-└── Herdr (persistent workspace and sessions)
-    └── OpenCode (AI harness)
-        └── RedOps (planning, routing, evidence and handoffs)
-            └── scoped specialist agents
-```
+Read `knowledgebase/INDEX.md` first. The canonical Markdown corpus is `knowledgebase/niches/`, organized by topic; retain and cite each document's source URL. The optional `knowledgebase/niches/api/` is user-supplied and excluded from Git.
 
-The orchestrator plans and delegates. It does not execute target commands itself.
-Every task starts in the native OpenCode/Herdr workflow; the RedOps CLI is an optional
-maintenance and offline-RAG tool, not a prerequisite. Active phases remain blocked until
-written scope, exact target allowlists, phase approval, and Exegol/runtime health are
-present.
+For each target, create `engagements/<name>/notes.md` with scope, exclusions, phase approvals, commands, evidence, findings, and cleanup. Keep credentials, loot, VPN files, and raw exports out of Git. Confirm written authorization and exact target allowlists before active work. Gate exploitation, post-exploitation, lateral movement, and persistence separately.
 
-## Shared workspace
-
-- `engagements/<name>/` is the private session workspace for one authorized target.
-- `notes.md` is the single handoff ledger; agents append under their own heading.
-- Keep loot, credentials, tokens, cookies, hashes, raw identity exports, and VPN data
-  outside the repository and outside `knowledge/`.
-- `knowledge/` is the source-grounded technique corpus; `writeups/` is the case corpus.
-- `knowledge/api/` is optional user-added API material and is intentionally excluded from
-  the RedOps index and Git by default. Enable it only with an explicit operator decision.
-
-## Agent lifecycle
-
-1. Confirm authorization, target allowlist, exclusions, timing and success criteria.
-2. Retrieve source-grounded context and route the task to the narrowest specialists.
-3. Run reconnaissance and assessment only inside the allowlist, preserving output and
-   citations in the session ledger.
-4. Gate exploitation, post-exploitation, lateral movement and persistence separately.
-5. Produce a minimal reproducible PoC and a sanitized report with cleanup evidence.
-
-The RedOps orchestrator must never claim a command ran without its command output. Use
-Exegol first, then an explicitly approved MCP, then the bounded terminal connector.
+The RedOps primary agent coordinates specialists in separate Herdr/OpenCode sessions. Give each worker only its scoped task and relevant evidence. Exegol is the preferred tool environment. Use `.opencode/tools.json` for role-specific tool/MCP requirements. Never claim a command ran without its output or invent findings.
