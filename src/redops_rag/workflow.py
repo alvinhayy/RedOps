@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import asdict, dataclass
+from pathlib import Path
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,7 +104,14 @@ def _validate_task(task: str) -> str:
 def _niche_hints(task: str) -> tuple[str, ...]:
     terms = set(re.findall(r"[a-z0-9][a-z0-9+.#_-]*", task.lower()))
     candidates = (
-        ("ad", ("active directory", "entra", "ldap", "kerberos", "bloodhound", "adcs")),
+        (
+            "ad",
+            (
+                "active directory", "entra", "ldap", "kerberos", "bloodhound", "adcs", "acl",
+                "dacl", "genericwrite", "forcechangepassword", "ntsecuritydescriptor",
+                "signed ldap",
+            ),
+        ),
         ("windows", ("windows", "winrm", "powershell", "lolbas", "iis", "smb")),
         ("linux", ("linux", "ssh", "sudo", "suid", "systemd", "nfs")),
         ("web", ("web", "api", "http", "https", "xss", "sqli", "ssrf", "waf")),
@@ -112,6 +120,10 @@ def _niche_hints(task: str) -> tuple[str, ...]:
         ("network", ("network", "nmap", "pcap", "wireless", "vpn", "pivot")),
         ("container", ("docker", "kubernetes", "k8s", "container", "trivy")),
         ("web3", ("web3", "solidity", "defi", "ethereum", "smart contract")),
+        (
+            "supply_chain",
+            ("vsix", "vscode", "visual studio code", "extension", "devdrop", "supply chain"),
+        ),
     )
     result = []
     lowered = task.lower()
@@ -126,12 +138,19 @@ def plan_engagement(
     *,
     scope_confirmed: bool = False,
     include_active: bool = False,
+    scope_record: str | Path | None = None,
 ) -> dict[str, object]:
-    """Return a read-only phase plan; this function never executes a target action."""
+    """Return a read-only phase plan; this function never executes a target action.
+
+    ``scope_record`` is an evidence pointer only.  It is inspected for the
+    expected authorization/allowlist sections, but it never changes either
+    gate: an operator must still pass both explicit boolean flags.
+    """
 
     normalized = _validate_task(task)
     if not isinstance(scope_confirmed, bool) or not isinstance(include_active, bool):
         raise TypeError("scope_confirmed and include_active must be booleans")
+    record = _inspect_scope_record(scope_record) if scope_record is not None else None
     active_allowed = scope_confirmed and include_active
     phases = []
     for phase in PHASES:
@@ -142,7 +161,7 @@ def plan_engagement(
         elif phase.id in {"exploitation", "post_exploitation", "lateral_movement"} and not active_allowed:
             row["status"] = "blocked_until_scope_and_approval"
         phases.append(row)
-    return {
+    result = {
         "task": normalized,
         "niche_hints": list(_niche_hints(normalized)),
         "authorization_required": True,
@@ -156,6 +175,54 @@ def plan_engagement(
             "include": ["phase_output", "source_citations", "target_scope", "open_questions"],
             "exclude": ["credentials", "tokens", "unscoped_targets", "unsupported_claims"],
         },
+    }
+    if record is not None:
+        result["scope_record"] = record
+    return result
+
+
+def _inspect_scope_record(scope_record: str | Path) -> dict[str, object]:
+    """Inspect a local scope artifact without treating it as authorization.
+
+    Only structural metadata is returned; the document body is never copied into
+    a plan.  This makes missing/incorrect scope artifacts visible while keeping
+    the explicit scope and active-execution gates intact.
+    """
+
+    if isinstance(scope_record, Path):
+        path = scope_record
+    elif isinstance(scope_record, str) and scope_record.strip():
+        path = Path(scope_record.strip())
+    else:
+        raise TypeError("scope_record must be a non-empty path")
+    if not path.is_file():
+        raise ValueError(f"scope_record is not a readable file: {path}")
+    try:
+        content = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ValueError(f"scope_record cannot be read: {path}") from exc
+    if len(content) > 1_000_000:
+        raise ValueError("scope_record is larger than the 1 MiB inspection limit")
+    lowered = content.lower()
+    targets = tuple(sorted(set(re.findall(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", content))))
+    markers = {
+        "authorization_section": "## authorization" in lowered,
+        "target_inventory_section": "target inventory" in lowered,
+        "explicit_allowlist": "in scope" in lowered and "yes" in lowered,
+        "phase_approvals_section": "phase approvals" in lowered,
+    }
+    valid = all(markers.values()) and bool(targets)
+    return {
+        "path": str(path),
+        "present": True,
+        "valid_structure": valid,
+        "target_count": len(targets),
+        "targets": list(targets),
+        "markers": markers,
+        "authorization_note": (
+            "structural evidence only; explicit scope confirmation and active-phase approval "
+            "are still required"
+        ),
     }
 
 

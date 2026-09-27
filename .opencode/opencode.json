@@ -1,0 +1,32 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "redops",
+  "skills": {
+    "paths": [".opencode/skill"]
+  },
+  "references": {
+    "redops-knowledge": {
+      "path": "./knowledge",
+      "description": "Niche-organized RedOps knowledge. Do not traverse knowledge/api: the book-derived API archive is intentionally excluded. Prefer the source-grounded RAG MCP when available."
+    },
+    "redops-writeups": {
+      "path": "./writeups",
+      "description": "Sanitized engagement writeups and lab evidence; never store credentials or raw loot here."
+    },
+    "redops-agents": {
+      "path": "./agents",
+      "description": "Capability registry, MCP/tool policy, and specialist routing metadata."
+    },
+    "engagement-ledger": {
+      "path": "./engagements",
+      "description": "Private per-engagement handoff ledgers. Use one notes.md per authorized target."
+    }
+  },
+  "permission": {
+    "edit": "allow",
+    "bash": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "external_directory": "allow"
+  }
+}

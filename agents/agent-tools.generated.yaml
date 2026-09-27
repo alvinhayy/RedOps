@@ -3,21 +3,22 @@ description: Generated union of registry and skill tooling
 agents:
   orchestrator_agent:
     required:
-    - redops
-    optional: []
+    - herdr
+    - opencode
+    optional:
+    - redops-rag
   scope_agent:
-    required:
-    - redops
+    required: []
     optional:
     - jq
     - markdown-tools
     - nmap
     - pandoc
     - python
+    - redops
   recon_agent:
     required:
     - nmap
-    - redops
     optional:
     - httpx
     - jq
@@ -26,10 +27,10 @@ agents:
     - netexec
     - pandoc
     - python
+    - redops
     - tshark
   assessment_agent:
-    required:
-    - redops
+    required: []
     optional:
     - jq
     - markdown-tools
@@ -37,11 +38,11 @@ agents:
     - nuclei
     - pandoc
     - python
+    - redops
     - semgrep
     - trivy
   exploitation_agent:
-    required:
-    - redops
+    required: []
     optional:
     - jq
     - markdown-tools
@@ -50,9 +51,9 @@ agents:
     - nuclei
     - pandoc
     - python
-  post_exploitation_agent:
-    required:
     - redops
+  post_exploitation_agent:
+    required: []
     optional:
     - bloodhound-python
     - jq
@@ -62,11 +63,11 @@ agents:
     - nmap
     - pandoc
     - python
+    - redops
     - seatbelt
   lateral_movement_agent:
     required:
     - nmap
-    - redops
     optional:
     - bloodhound-python
     - impacket
@@ -76,9 +77,9 @@ agents:
     - netexec
     - pandoc
     - python
-  poc_agent:
-    required:
     - redops
+  poc_agent:
+    required: []
     optional:
     - curl
     - jq
@@ -86,15 +87,16 @@ agents:
     - nmap
     - pandoc
     - python
+    - redops
   reporting_agent:
     required:
     - markdown-tools
-    - redops
     optional:
     - jq
     - nmap
     - pandoc
     - python
+    - redops
   ad_agent:
     required:
     - bloodhound-python
@@ -232,7 +234,6 @@ agents:
     required:
     - markdown-tools
     - python
-    - redops
     optional:
     - jq
     - pandoc

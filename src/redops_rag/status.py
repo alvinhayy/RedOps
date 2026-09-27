@@ -6,6 +6,7 @@ import shutil
 from typing import Any
 
 from .config import Settings
+from .execution import CommandRunner, ExecutionError
 from .providers import get_provider
 from .store import IndexStore
 
@@ -19,6 +20,21 @@ def collect_status(settings: Settings | None = None) -> dict[str, Any]:
         "chunks": 0,
         "embedding_fingerprint": None,
     }
+    exegol_cli_available = shutil.which("exegol") is not None
+    exegol_runtime = "not_configured"
+    exegol_error = None
+    if settings.execution_backend == "exegol":
+        if not exegol_cli_available:
+            exegol_runtime = "cli_missing"
+        else:
+            try:
+                # Probe only; never return Exegol's stdout because it can contain
+                # generated container credentials.
+                CommandRunner(settings).status()
+                exegol_runtime = "ready"
+            except ExecutionError as exc:
+                exegol_runtime = "unavailable"
+                exegol_error = exc.code
     return {
         "provider": provider.id,
         "provider_name": provider.display_name,
@@ -32,14 +48,25 @@ def collect_status(settings: Settings | None = None) -> dict[str, Any]:
         "chunks": index["chunks"],
         "execution_backend": settings.execution_backend,
         "exegol_container": settings.exegol_container,
-        "exegol_cli_available": shutil.which("exegol") is not None,
+        "exegol_cli_available": exegol_cli_available,
+        "exegol_runtime": exegol_runtime,
+        "exegol_error": exegol_error,
     }
 
 
 def render_status(status: dict[str, Any]) -> str:
     key_state = "configured" if status["api_key_configured"] else "not configured"
     index_state = "ready" if status["index_exists"] else "not initialized"
-    exegol_state = "available" if status["exegol_cli_available"] else "not found"
+    if status["execution_backend"] == "exegol":
+        exegol_state = {
+            "ready": "ready",
+            "unavailable": "unavailable",
+            "cli_missing": "CLI not found",
+        }.get(status["exegol_runtime"], status["exegol_runtime"])
+        if status.get("exegol_error"):
+            exegol_state += f" ({status['exegol_error']})"
+    else:
+        exegol_state = "not selected"
     lines = [
         "RedOps status",
         "─────────────",

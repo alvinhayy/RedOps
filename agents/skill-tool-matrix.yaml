@@ -22,14 +22,14 @@ skills:
     slash_commands: [engagement-workflow]
     knowledge_niches: [methodology, vulnerabilities, tools, network, ad, web, cloud, linux, windows]
     executables:
-      required: [redops]
-      optional: [nmap, python, jq, markdown-tools, pandoc]
+      required: []
+      optional: [redops, nmap, python, jq, markdown-tools, pandoc]
     mcp:
       required: [redops-rag]
       optional: [redops-exegol, terminal-bounded]
     health_checks:
-      - "redops workflow --help"
-      - "redops exegol status"
+      - "Herdr workspace/session health"
+      - "Exegol workspace health"
       - "MCP health/capabilities for redops-rag and redops-exegol"
     fallback: >-
       Produce a read-only phase plan and stop at the missing authorization, scope,

@@ -3,8 +3,17 @@
 This directory defines routing profiles for the RedOps knowledge base. Profiles are
 organized by the technical niche of the corpus, not by source website. The canonical
 machine-readable registry is [`registry.yaml`](registry.yaml).
+
+The OpenCode-facing runtime graph is [`agent-graph.yaml`](agent-graph.yaml). It exposes
+the operator-friendly roles `recon`, `web-recon`, `web-exploit`, `cve-research`,
+`ad-enum`, `ad-exploit`, `linux-privesc`, `windows-privesc`, and `persistence`, while
+reusing the capability/MCP policy in `registry.yaml` instead of duplicating permissions.
 Tool availability, required/optional status, source, and health checks are in
 [`tools.md`](tools.md).
+
+When the repository is opened in Herdr, `.opencode/opencode.json` selects `redops` as
+the primary OpenCode agent. It can spawn these specialist roles directly in `ai-*` tabs;
+the standalone RedOps CLI remains an optional maintenance and offline-RAG fallback.
 
 ## Routing model
 
@@ -47,7 +56,8 @@ The mapping reflects the current repository layout: categories are direct childr
 `knowledge/`, with mobile-specific subdirectories. `misc/` is intentionally not a
 primary offensive routing target; it is a fallback for material that cannot yet be
 classified. `database/`, `methodology/`, `tools/`, and `vulnerabilities/` are shared
-cross-cutting niches.
+cross-cutting niches. `knowledge/api/` is a book-derived archive and is excluded from
+the active index by `REDOPS_KNOWLEDGE_EXCLUDE=api`.
 
 ## Important connector boundary
 

@@ -1,0 +1,61 @@
+version: 1
+name: redops-specialist-graph
+description: >-
+  OpenCode-facing specialist graph. Capability and connector policy remains in
+  registry.yaml; this file defines the names and handoff order exposed by the
+  Exegol/Herdr/OpenCode runtime.
+runtime:
+  environment: exegol
+  workspace: herdr
+  harness: opencode
+  orchestrator: redops
+  session_ledger: engagements/<engagement>/notes.md
+orchestrator:
+  prompt: .opencode/agent/redops.md
+  commands: [.opencode/command/solve.md, .opencode/command/status.md]
+agents:
+  recon:
+    prompt: .opencode/agent/recon.md
+    registry_profile: recon_agent
+    phase: information_gathering
+    knowledge: [network, web, ad, cloud, mobile, methodology, tools]
+  web-recon:
+    prompt: .opencode/agent/web-recon.md
+    registry_profile: web_agent
+    phase: information_gathering
+    knowledge: [web, api, network, methodology, tools]
+  web-exploit:
+    prompt: .opencode/agent/web-exploit.md
+    registry_profile: exploitation_agent
+    phase: exploitation
+    knowledge: [web, api, vulnerabilities, redteam, methodology]
+  cve-research:
+    prompt: .opencode/agent/cve-research.md
+    registry_profile: assessment_agent
+    phase: vulnerability_assessment
+    knowledge: [vulnerabilities, tools, methodology, windows, linux, web]
+  ad-enum:
+    prompt: .opencode/agent/ad-enum.md
+    registry_profile: ad_agent
+    phase: information_gathering
+    knowledge: [ad, windows, database, methodology, tools]
+  ad-exploit:
+    prompt: .opencode/agent/ad-exploit.md
+    registry_profile: ad_agent
+    phase: exploitation
+    knowledge: [ad, windows, redteam, vulnerabilities, methodology]
+  linux-privesc:
+    prompt: .opencode/agent/linux-privesc.md
+    registry_profile: exploitation_agent
+    phase: vulnerability_assessment
+    knowledge: [linux, vulnerabilities, redteam, tools, methodology]
+  windows-privesc:
+    prompt: .opencode/agent/windows-privesc.md
+    registry_profile: windows_redteam_agent
+    phase: vulnerability_assessment
+    knowledge: [windows, ad, redteam, vulnerabilities, tools]
+  persistence:
+    prompt: .opencode/agent/persistence.md
+    registry_profile: post_exploitation_agent
+    phase: post_exploitation
+    knowledge: [redteam, ad, cloud, windows, linux, methodology]

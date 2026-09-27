@@ -125,3 +125,20 @@ def test_knowledge_and_writeups_are_separate_corpora(tmp_path: Path) -> None:
     assert service.query("LDAP enumeration", generate=False, corpus="knowledge")["sources"][0]["corpus"] == "knowledge"
     assert service.query("LDAP enumeration", generate=False, corpus="writeups")["sources"][0]["corpus"] == "writeups"
     assert service.store.stats()["documents_by_corpus"] == {"knowledge": 1, "writeups": 1}
+
+
+def test_api_knowledge_niche_is_excluded_from_index(tmp_path: Path) -> None:
+    config = settings(tmp_path)
+    config.knowledge_dir.mkdir()
+    (config.knowledge_dir / "api").mkdir()
+    (config.knowledge_dir / "api" / "book.md").write_text(
+        "# API book\n\nShould not be indexed by the pentest corpus.", encoding="utf-8"
+    )
+    (config.knowledge_dir / "linux.md").write_text("# Linux\n\nSUID review.", encoding="utf-8")
+    service = RagService(config)
+
+    report = service.ingest()
+    assert report["discovered"] == 1
+    assert service.store.stats()["documents"] == 1
+    results = service.store.search("API book", [0.0] * config.embedding_dimension, 3, 0.65)
+    assert all(result.title != "API book" for result in results)

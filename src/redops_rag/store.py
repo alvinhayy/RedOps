@@ -210,6 +210,30 @@ class IndexStore:
                 continue
             scores[chunk_id] = scores.get(chunk_id, 0.0) + (1 - vector_weight) / (60 + rank)
 
+        # Apply a small deterministic precision boost for artifact-oriented
+        # queries.  RRF remains the primary ranker; this only helps exact terms
+        # such as VSIX, nTSecurityDescriptor, or GenericWrite beat semantically
+        # similar but less actionable excerpts.
+        artifact_terms = {
+            "vsix", "vscode", "devdrop", "genericwrite", "forcechangepassword",
+            "ntsecuritydescriptor", "signed", "ldap", "acl", "dacl",
+        }
+        query_terms = {term.lower() for term in terms}
+        for chunk_id in tuple(scores):
+            row = row_by_id[chunk_id]
+            searchable = " ".join(
+                (row["title"], row["heading"], row["path"], row["content"])
+            ).lower()
+            exact_artifacts = {
+                term for term in query_terms & artifact_terms if term in searchable
+            }
+            if exact_artifacts:
+                scores[chunk_id] += 0.004 * len(exact_artifacts)
+            metadata_text = " ".join((row["title"], row["heading"], row["path"])).lower()
+            heading_matches = sum(1 for term in query_terms if term in metadata_text)
+            if heading_matches:
+                scores[chunk_id] += 0.001 * min(heading_matches, 4)
+
         ranked = sorted(scores, key=scores.get, reverse=True)[:limit]
         return [
             SearchResult(

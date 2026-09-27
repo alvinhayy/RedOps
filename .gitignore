@@ -15,5 +15,10 @@ data/*.db
 data/*.db-*
 *.sqlite
 *.sqlite3
+knowledge/api/
+docs/lab-observations/
+engagements/*
+!engagements/README.md
+!engagements/ENGAGEMENT-TEMPLATE.md
 dist/
 *.egg-info/

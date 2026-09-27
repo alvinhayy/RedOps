@@ -20,9 +20,9 @@ agents:
     allowed_mcp: [redops-rag]
     mcp_profile: orchestrator
     tooling:
-      required: [redops]
-      optional: []
-    fallback: retrieve with the RedOps CLI and return a bounded routing plan without execution
+      required: [opencode, herdr]
+      optional: [redops-rag]
+    fallback: use local OpenCode references and return a bounded routing plan without execution
     guardrails:
       - Confirm authorization and scope before delegating active work.
       - Retrieval and routing do not imply permission to execute commands or contact targets.
@@ -34,7 +34,7 @@ agents:
     allowed_mcp: [redops-rag]
     mcp_profile: scope
     tooling:
-      required: [redops]
+      required: []
       optional: [jq]
     fallback: stop and return the missing authorization or scope fields
     guardrails:
@@ -48,7 +48,7 @@ agents:
     allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
     mcp_profile: recon
     tooling:
-      required: [redops, nmap]
+      required: [nmap]
       optional: [httpx, netexec, ldapsearch, tshark]
     fallback: offline artifact and banner analysis
     guardrails:
@@ -62,7 +62,7 @@ agents:
     allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
     mcp_profile: assessment
     tooling:
-      required: [redops]
+      required: []
       optional: [nmap, nuclei, semgrep, trivy]
     fallback: source-grounded offline triage
     guardrails:
@@ -76,7 +76,7 @@ agents:
     allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
     mcp_profile: exploitation
     tooling:
-      required: [redops]
+      required: []
       optional: [nmap, metasploit, nuclei]
     fallback: document why validation was not run; never claim success
     guardrails:
@@ -90,7 +90,7 @@ agents:
     allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
     mcp_profile: post-exploitation
     tooling:
-      required: [redops]
+      required: []
       optional: [bloodhound-python, netexec, seatbelt, linpeas]
     fallback: analyze existing artifacts without collecting new target data
     guardrails:
@@ -104,7 +104,7 @@ agents:
     allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
     mcp_profile: lateral-movement
     tooling:
-      required: [redops, nmap]
+      required: [nmap]
       optional: [bloodhound-python, netexec, impacket, kerbrute]
     fallback: graph and PCAP analysis without live movement
     guardrails:
@@ -118,7 +118,7 @@ agents:
     allowed_mcp: [redops-rag, redops-exegol, terminal-bounded]
     mcp_profile: poc
     tooling:
-      required: [redops]
+      required: []
       optional: [python, curl, jq]
     fallback: a dry-run reproduction and evidence-only report
     guardrails:
@@ -132,7 +132,7 @@ agents:
     allowed_mcp: [redops-rag, terminal-bounded]
     mcp_profile: reporting
     tooling:
-      required: [redops, markdown-tools]
+      required: [markdown-tools]
       optional: [jq, pandoc]
     fallback: Markdown report with explicit evidence gaps
     guardrails:
@@ -278,7 +278,7 @@ agents:
     allowed_mcp: [redops-rag, terminal-bounded]
     mcp_profile: rag-curator
     tooling:
-      required: [redops, python, markdown-tools]
+      required: [python, markdown-tools]
       optional: [ripgrep, jq, pandoc]
     fallback: local filesystem and RAG CLI only; no target interaction
     guardrails:

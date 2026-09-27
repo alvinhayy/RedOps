@@ -56,6 +56,8 @@ TOOLS = [
             "properties": {
                 "task": {"type": "string", "minLength": 1},
                 "limit": {"type": "integer", "minimum": 1, "maximum": 5},
+                "lab": {"type": "string", "enum": list(lab_ids())},
+                "os_hint": {"type": "string", "enum": ["unknown", "windows", "linux"]},
             },
             "required": ["task"],
             "additionalProperties": False,
@@ -73,6 +75,10 @@ TOOLS = [
                 "include_active": {"type": "boolean", "default": False},
                 "lab": {"type": "string", "enum": list(lab_ids())},
                 "os_hint": {"type": "string", "enum": ["unknown", "windows", "linux"]},
+                "scope_record": {
+                    "type": "string",
+                    "description": "Local scope artifact to inspect as evidence; never confirms scope",
+                },
             },
             "required": ["task"],
             "additionalProperties": False,
@@ -109,7 +115,12 @@ class RagMcpServer:
             elif name == "route_task":
                 task = arguments.get("task")
                 limit = arguments.get("limit", 3)
-                payload = route_task(task, limit)
+                payload = route_task(
+                    task,
+                    limit,
+                    lab=arguments.get("lab"),
+                    os_hint=arguments.get("os_hint", "unknown"),
+                )
             elif name == "plan_engagement":
                 lab = arguments.get("lab")
                 if lab is None:
@@ -117,6 +128,7 @@ class RagMcpServer:
                         arguments.get("task"),
                         scope_confirmed=arguments.get("scope_confirmed", False),
                         include_active=arguments.get("include_active", False),
+                        scope_record=arguments.get("scope_record"),
                     )
                 else:
                     payload = lab_engagement(
@@ -125,6 +137,7 @@ class RagMcpServer:
                         os_hint=arguments.get("os_hint", "unknown"),
                         scope_confirmed=arguments.get("scope_confirmed", False),
                         include_active=arguments.get("include_active", False),
+                        scope_record=arguments.get("scope_record"),
                     )
             else:
                 raise ValueError(f"unknown tool: {name}")

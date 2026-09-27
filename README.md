@@ -27,6 +27,27 @@ RedOps (**Red Team Operators**) adalah framework RAG lokal untuk knowledge pente
 dapat ditelusuri kembali ke sumbernya. Gunakan hanya pada sistem yang Anda miliki atau
 memiliki izin eksplisit untuk diuji.
 
+## Runtime Architecture
+
+```text
+Exegol - Pentest Environment
+│   pentest tools · precompiled binaries · runtime knowledge
+│
+└── Herdr - Workspace / Sessions
+    └── OpenCode - AI Harness
+        └── RedOps - Orchestrator ──► authorized target
+            ├── recon          ├── web-recon      ├── web-exploit
+            ├── cve-research   ├── ad-enum        ├── ad-exploit
+            ├── linux-privesc  ├── windows-privesc └── persistence
+```
+
+Prompt OpenCode dan slash command tersedia di [`.opencode/`](.opencode/), sedangkan
+graph machine-readable ada di [`agents/agent-graph.yaml`](agents/agent-graph.yaml).
+Herdr menyediakan session/terminal yang persisten; Exegol tetap menjadi boundary tool.
+RedOps merencanakan, mengambil knowledge bersitasi, merutekan agent, dan memverifikasi
+handoff—bukan menjalankan target secara langsung. Detail layer ada di
+[`docs/architecture.md`](docs/architecture.md).
+
 ## Features
 
 - ingestion Markdown yang idempotent dan heading-aware;
@@ -44,6 +65,8 @@ memiliki izin eksplisit untuk diuji.
 - installer adapter native untuk Codex, Claude CLI, OpenCode, ZCode, Cursor, Gemini,
   Copilot, Windsurf, Amp, dan Crush;
 - bounded WAF timing benchmark dengan guardrail anti-DoS.
+- pemisahan runtime Exegol/Herdr/OpenCode dan specialist graph untuk engagement sessions;
+- `knowledge/api/` tetap tersedia sebagai arsip lokal tetapi dikecualikan dari index dan Git.
 
 ## Agent Profiles
 
@@ -81,6 +104,8 @@ Skill dipilih berdasarkan task, bukan dipasang ke semua agent:
 | `browser-vuln-hunting` | Web | Riset vulnerability browser dan PoC terisolasi |
 | `orchestration` | Semua agent | Dispatch, status, dan koordinasi worker |
 
+Runtime-specific prompt skills juga tersedia di [`.opencode/skill/`](.opencode/skill/).
+
 ### MCP
 
 Deployment RedOps menggunakan MCP read-only untuk knowledge dan MCP eksekusi terisolasi:
@@ -98,15 +123,15 @@ optional tools milik skill selalu ikut ke agent pemiliknya:
 <!-- BEGIN GENERATED AGENT TOOLS -->
 | Agent | Required tools (registry + owned skills) | Optional tools (registry + owned skills) |
 |---|---|---|
-| `orchestrator_agent` | `redops` | — |
-| `scope_agent` | `redops` | `jq`, `markdown-tools`, `nmap`, `pandoc`, `python` |
-| `recon_agent` | `nmap`, `redops` | `httpx`, `jq`, `ldapsearch`, `markdown-tools`, `netexec`, `pandoc`, `python`, `tshark` |
-| `assessment_agent` | `redops` | `jq`, `markdown-tools`, `nmap`, `nuclei`, `pandoc`, `python`, `semgrep`, `trivy` |
-| `exploitation_agent` | `redops` | `jq`, `markdown-tools`, `metasploit`, `nmap`, `nuclei`, `pandoc`, `python` |
-| `post_exploitation_agent` | `redops` | `bloodhound-python`, `jq`, `linpeas`, `markdown-tools`, `netexec`, `nmap`, `pandoc`, `python`, `seatbelt` |
-| `lateral_movement_agent` | `nmap`, `redops` | `bloodhound-python`, `impacket`, `jq`, `kerbrute`, `markdown-tools`, `netexec`, `pandoc`, `python` |
-| `poc_agent` | `redops` | `curl`, `jq`, `markdown-tools`, `nmap`, `pandoc`, `python` |
-| `reporting_agent` | `markdown-tools`, `redops` | `jq`, `nmap`, `pandoc`, `python` |
+| `orchestrator_agent` | `herdr`, `opencode` | `redops-rag` |
+| `scope_agent` | — | `jq`, `markdown-tools`, `nmap`, `pandoc`, `python`, `redops` |
+| `recon_agent` | `nmap` | `httpx`, `jq`, `ldapsearch`, `markdown-tools`, `netexec`, `pandoc`, `python`, `redops`, `tshark` |
+| `assessment_agent` | — | `jq`, `markdown-tools`, `nmap`, `nuclei`, `pandoc`, `python`, `redops`, `semgrep`, `trivy` |
+| `exploitation_agent` | — | `jq`, `markdown-tools`, `metasploit`, `nmap`, `nuclei`, `pandoc`, `python`, `redops` |
+| `post_exploitation_agent` | — | `bloodhound-python`, `jq`, `linpeas`, `markdown-tools`, `netexec`, `nmap`, `pandoc`, `python`, `redops`, `seatbelt` |
+| `lateral_movement_agent` | `nmap` | `bloodhound-python`, `impacket`, `jq`, `kerbrute`, `markdown-tools`, `netexec`, `pandoc`, `python`, `redops` |
+| `poc_agent` | — | `curl`, `jq`, `markdown-tools`, `nmap`, `pandoc`, `python`, `redops` |
+| `reporting_agent` | `markdown-tools` | `jq`, `nmap`, `pandoc`, `python`, `redops` |
 | `ad_agent` | `bloodhound-python`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
 | `windows_redteam_agent` | `lolbas`, `powerview`, `seatbelt`, `winpeas` | `mimikatz` |
 | `web_agent` | `burp`, `httpx`, `nmap` | `camoufox`, `ffuf`, `nuclei`, `xsrfprobe` |
@@ -116,7 +141,7 @@ optional tools milik skill selalu ikut ke agent pemiliknya:
 | `network_agent` | `netexec`, `nmap`, `tshark` | `masscan`, `responder`, `wireshark` |
 | `container_devops_agent` | `docker`, `kubectl`, `trivy` | `grype`, `helm`, `kube-bench`, `syft` |
 | `web3_agent` | `cast`, `mythril`, `slither` | `burp`, `echidna`, `foundry`, `semgrep` |
-| `rag_curator_agent` | `markdown-tools`, `python`, `redops` | `jq`, `pandoc`, `ripgrep` |
+| `rag_curator_agent` | `markdown-tools`, `python` | `jq`, `pandoc`, `ripgrep` |
 <!-- END GENERATED AGENT TOOLS -->
 
 Regenerasi setelah mengubah registry atau skill:
@@ -126,8 +151,10 @@ python scripts/sync_agent_tools.py
 python scripts/sync_agent_tools.py --check
 ```
 
-Slash command skill juga ditemukan otomatis oleh `redops install-cli claude` dan
-`redops install-cli opencode`: setiap file Markdown di `commands/` (termasuk
+Slash command skill juga ditemukan otomatis oleh adapter provider, tetapi instalasi
+CLI bersifat opsional. Dalam layout native Makima-style, OpenCode membaca `.opencode/`
+langsung dari checkout dan tidak membutuhkan perintah `redops` untuk menjalankan
+engagement. Setiap file Markdown di `commands/` (termasuk
 `.agents/commands/` pada repository skill) disalin apa adanya. RedOps memindai
 skill di direktori kerja, `~/.agents`, dan `~/.codex`; tambahkan lokasi lain dengan
 `--skill-path` atau `REDOPS_SKILL_PATHS` (dipisahkan `:` di macOS/Linux). File
@@ -138,21 +165,26 @@ meminta phase plan tanpa menjalankan target. Ia menggunakan agent fase (`scope`,
 `assessment`, `exploitation`, `post-exploitation`, `lateral-movement`, `poc`, dan
 `reporting`) yang didefinisikan di `agents/workflow.yaml`.
 
-`/redops-rag <task>` adalah entry point orchestrator. Command ini mengklasifikasikan
-task ke niche agent paling tepat, membuat phase plan dari pre-engagement sampai
-post-engagement, mengambil konteks dari MCP `redops-rag`, meminta scope tertulis sebelum
-active testing, lalu mendelegasikan pekerjaan ke phase agent dan specialist agent.
+Saat OpenCode berjalan di dalam Herdr, agent `redops` adalah entry point orchestrator.
+Operator cukup memberi instruksi natural-language; `/solve <task>` dan `/status` hanya
+shortcut opsional. Agent mengklasifikasikan task, membuat phase plan dari
+pre-engagement sampai post-engagement, mengambil konteks dari RAG/reference, lalu
+mendelegasikan pekerjaan ke specialist di tab `ai-*`. Tidak ada command `redops`
+yang wajib dijalankan oleh operator.
 Diagram dan machine-readable workflow tersedia di [`agents/workflow.yaml`](agents/workflow.yaml).
 Visual flow dan handoff contract tersedia di [`docs/pentest-workflow.md`](docs/pentest-workflow.md).
 Ia tidak mengeksekusi target secara langsung; eksekusi tetap menjadi tanggung jawab
 specialist melalui Exegol setelah scope dan approval fase dikonfirmasi.
 
-Workflow dapat diuji tanpa menyentuh target:
+Jika tidak menjalankan OpenCode/Herdr, workflow engine juga dapat diuji secara opsional
+melalui CLI (ini bukan jalur utama Makima-style):
 
 ```bash
 redops workflow "assess a Linux server"
 redops orchestrate "audit an Active Directory domain"
 redops workflow "HTB Pro Lab tiered domain" --lab htb_pro_lab --os-hint windows
+redops workflow "audit the approved host" --scope-record docs/lab-observations/checkpoint-scope-record.md
+redops orchestrate "enumerate signed LDAP ACLs" --lab htb_lab --os-hint windows
 ```
 
 Flag `--lab` (htb_lab, htb_pro_lab, htb_academy) melampirkan target context read-only
@@ -160,6 +192,11 @@ untuk lab resmi seperti Hack The Box: metadata platform, network hint dokumentas
 routing hint specialist berdasarkan `--os-hint`. Lab context tidak pernah mengubah
 scope gates, tidak menerima/menyimpan VPN key atau API token, dan kebijakan
 Exegol-first tetap berlaku.
+
+`--scope-record` hanya memeriksa struktur artefak scope (authorization, target
+inventory, allowlist, dan phase approvals) untuk membantu auditability. Flag ini tidak
+menyetujui scope dan tidak membuka fase aktif; `--scope-confirmed --include-active`
+tetap harus diberikan secara eksplisit.
 
 Tool names are capability requirements; health-check them inside Exegol before use.
 Install only what the approved engagement needs and keep credentials outside the corpus.
@@ -205,6 +242,23 @@ redops providers
 ```
 
 ## Quick Start
+
+### OpenCode + Herdr (jalur utama)
+
+Buka checkout ini sebagai workspace Herdr lalu jalankan OpenCode. File
+`.opencode/opencode.json` memilih agent `redops` sebagai primary agent; setelah itu
+operator cukup memberi instruksi natural-language. RedOps akan membuat ledger,
+men-spawn tab `ai-*`, dan mengoordinasikan specialist tanpa perlu menjalankan command
+CLI `redops` secara manual.
+
+```text
+open workspace RedOps di Herdr → start OpenCode → bicara dengan agent redops
+```
+
+`/solve` dan `/status` tersedia sebagai shortcut opsional. Detail perilaku agent ada di
+[`.opencode/agent/redops.md`](.opencode/agent/redops.md).
+
+### RedOps CLI (opsional)
 
 Persyaratan: Python 3.11+ dan SQLite yang mendukung FTS5.
 
@@ -290,6 +344,14 @@ redops exegol exec -- nmap -sV 192.0.2.10
 menjalankan shell. `REDOPS_EXEGOL_TMP=true` meneruskan opsi temporary container dan
 `REDOPS_EXEGOL_VERBOSE=true` meneruskan verbose ke Exegol. Backend default tetap `local`;
 set `REDOPS_EXECUTION_BACKEND=exegol` secara eksplisit untuk menggunakan Exegol.
+
+Jika Docker Desktop aktif tetapi status menunjukkan `unavailable`, periksa socket yang
+dipakai terminal. Contoh macOS Docker Desktop:
+
+```bash
+export DOCKER_HOST="unix://$HOME/.docker/run/docker.sock"
+docker info >/dev/null && redops exegol status
+```
 
 ## Agent mobile
 

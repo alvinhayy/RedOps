@@ -11,31 +11,21 @@ from pathlib import Path
 
 INTEGRATION_TEXT = """# RedOps RAG integration
 
-Use RedOps as the source-grounded knowledge and execution layer for authorized
-security work. Start with retrieval, cite the returned source paths/URLs, and
-never claim a command ran unless its output is present.
+Use RedOps as the source-grounded knowledge and execution policy for authorized
+security work. In OpenCode, behave like a Makima-style orchestrator: retrieve through
+the read-only RAG MCP or local references, spawn scoped specialists through Herdr, and
+collect durable handoffs in `engagements/<name>/notes.md`. The operator should not need
+to invoke a RedOps CLI command to run an engagement.
 
-## Core commands
-
-```bash
-redops providers
-redops stats
-redops query \"<question>\"
-redops query \"<question>\" --no-generate
-redops workflow \"<authorized task>\"
-redops orchestrate \"<authorized task>\"
-redops exegol status
-```
-
-Use `redops workflow` to plan the phase-gated lifecycle before routing niche agents.
-Use `redops exegol exec -- <argv...>` only after confirming written scope and
-the configured Exegol container. Keep active web/mobile/WAF checks to approved
-local, staging, or lab targets; do not submit destructive payloads or create
-load. Knowledge lives in Markdown and should be refreshed with `redops ingest`.
-
-When a provider is unavailable, use `redops query --no-generate` for a local,
-extractive answer. Provider credentials must remain in environment variables,
+Start with written scope and phase gates. Keep recon and independent research parallel,
+but gate exploitation, post-exploitation, lateral movement, and persistence separately.
+Use Exegol for approved execution, cite source paths/URLs, and never claim a command ran
+unless its output is present. Provider credentials remain in environment/configuration,
 never in prompts, reports, or the shared corpus.
+
+The standalone `redops` CLI remains an optional maintenance/offline fallback for index
+refresh, diagnostics, and local extractive retrieval; it is not a prerequisite for the
+native OpenCode/Herdr workflow.
 """
 
 CODEX_SKILL_TEXT = """---
@@ -57,26 +47,20 @@ scope and written authorization, then hand off evidence through information gath
 vulnerability assessment, approved exploitation, post-exploitation impact validation,
 lateral-movement validation, proof-of-concept packaging, and post-engagement reporting.
 
-Call the `plan_engagement` tool from the `redops-rag` MCP or run:
-
-```bash
-redops workflow "<authorized task>"
-```
-
-Call `route_task` to select technical niche agents. Active phases remain blocked until
+Call the `plan_engagement` and `route_task` tools from the read-only `redops-rag` MCP,
+or use the equivalent native OpenCode routing prompt. Active phases remain blocked until
 written scope, exact target allowlists, phase approval, and Exegol/runtime health are
 confirmed. Every handoff includes evidence, source citations, scope, artifacts, and
 open questions. Never include credentials or claim a command ran without output.
 
-For authorized lab platforms (Hack The Box), attach read-only target context with
-`redops workflow "<authorized task>" --lab htb_lab --os-hint windows`. Lab metadata
-never confirms scope, never stores VPN keys or API tokens, and leaves the gates and
-Exegol-first policy unchanged.
+For authorized lab platforms (Hack The Box), provide the target context directly to the
+orchestrator. Lab metadata never confirms scope, never stores VPN keys or API tokens,
+and leaves the gates and Exegol-first policy unchanged.
 """
 
 ORCHESTRATOR_COMMAND_TEXT = (
     "Act as the RedOps orchestrator for $ARGUMENTS. First call `plan_engagement` "
-    "from the redops-rag MCP (or run `redops workflow`) to create the phase-gated "
+    "from the read-only redops-rag MCP or native OpenCode workflow to create the phase-gated "
     "lifecycle: pre-engagement, information gathering, vulnerability assessment, "
     "exploitation, post-exploitation, lateral movement, proof-of-concept, and "
     "post-engagement. Then call `route_task` for niche specialists, retrieve context "

@@ -6,13 +6,25 @@
       "name": "redops-rag",
       "skill": "redops-rag",
       "description": "Route an authorized task through the RedOps orchestrator and source-grounded RAG.",
-      "content": "Act as the RedOps orchestrator for $ARGUMENTS. First call `plan_engagement` from the redops-rag MCP (or run `redops workflow`) to create the phase-gated lifecycle: pre-engagement, information gathering, vulnerability assessment, exploitation, post-exploitation, lateral movement, proof-of-concept, and post-engagement. Then call `route_task` for niche specialists, retrieve context with `search_knowledge`/`search_writeups`, and delegate each phase to the matching phase agent and niche agent using the provider's native agent/task mechanism. Stop active phases until written scope and exact approval are confirmed. Pass each worker only its scoped evidence and handoff contract, preserve [S#] citations and source URLs, and never claim a command ran without its output. Execution remains Exegol-first and belongs to the approved phase specialist."
+      "content": "Act as the RedOps orchestrator for $ARGUMENTS. Load the native Herdr/OpenCode orchestration skills, confirm the phase-gated lifecycle, retrieve source-grounded context from the read-only RAG MCP or local references, and delegate each phase to the matching specialist agent in a separate Herdr tab. Stop active phases until written scope and exact approval are confirmed. Pass each worker only its scoped evidence and handoff contract, preserve [S#] citations and source URLs, and never claim a command ran without its output. Execution remains Exegol-first and belongs to the approved phase specialist; no RedOps CLI command is required."
     },
     {
       "name": "engagement-workflow",
       "skill": "engagement-workflow",
       "description": "Build a phase-gated RedOps engagement plan for an authorized task.",
       "content": "Use the `engagement-workflow` skill. Call `plan_engagement` first, then `route_task` for niche agents. Keep exploitation, post-exploitation, and lateral movement blocked until written scope and exact approval are confirmed. Preserve source citations and handoff artifacts; never claim execution without command output. Task: $ARGUMENTS"
+    },
+    {
+      "name": "solve",
+      "skill": "redops-orchestration",
+      "description": "Start a phase-gated RedOps engagement and coordinate scoped specialists.",
+      "content": "Act as the RedOps orchestrator for $ARGUMENTS. Call `plan_engagement` first, then `route_task`; confirm written scope, exact target allowlists, phase approvals and Exegol health; use engagements/<name>/notes.md as the handoff ledger; delegate only scoped evidence to recon, web-recon, web-exploit, cve-research, ad-enum, ad-exploit, linux-privesc, windows-privesc and persistence. Keep active phases blocked until their gates are satisfied and never claim a command ran without output."
+    },
+    {
+      "name": "status",
+      "skill": "redops-orchestration",
+      "description": "Show RedOps, RAG and Exegol readiness without exposing secrets.",
+      "content": "Inspect the active Herdr workspace, OpenCode specialist tabs, Exegol reachability, RAG/reference availability, and the capability policy in agents/registry.yaml. Report readiness gaps without exposing credentials. Do not start scans, mutate targets, or infer authorization from runtime health."
     },
     {
       "name": "mobile-vuln-hunt",

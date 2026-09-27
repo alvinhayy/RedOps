@@ -63,6 +63,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     orchestrate_parser.add_argument("task")
     orchestrate_parser.add_argument("--limit", type=int, default=3)
+    orchestrate_parser.add_argument(
+        "--lab", choices=lab_ids(), default=None, help="attach read-only lab context"
+    )
+    orchestrate_parser.add_argument(
+        "--os-hint", choices=("unknown", "windows", "linux"), default="unknown"
+    )
 
     workflow_parser = subparsers.add_parser(
         "workflow", help="plan the phase-gated penetration-testing workflow"
@@ -87,6 +93,10 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("unknown", "windows", "linux"),
         default="unknown",
         help="lab target OS hint used only for specialist routing hints",
+    )
+    workflow_parser.add_argument(
+        "--scope-record",
+        help="inspect a local scope artifact as structural evidence; never confirms scope",
     )
 
     interactive_parser = subparsers.add_parser(
@@ -179,7 +189,13 @@ def main() -> None:
         from .orchestrator import route_task
 
         try:
-            print(json.dumps(route_task(args.task, args.limit), indent=2, ensure_ascii=False))
+            print(
+                json.dumps(
+                    route_task(args.task, args.limit, lab=args.lab, os_hint=args.os_hint),
+                    indent=2,
+                    ensure_ascii=False,
+                )
+            )
         except ValueError as exc:
             print(json.dumps({"error": "invalid_task", "message": str(exc)}))
             raise SystemExit(2) from exc
@@ -197,12 +213,14 @@ def main() -> None:
                     os_hint=args.os_hint,
                     scope_confirmed=args.scope_confirmed,
                     include_active=args.include_active,
+                    scope_record=args.scope_record,
                 )
             else:
                 result = plan_engagement(
                     args.task,
                     scope_confirmed=args.scope_confirmed,
                     include_active=args.include_active,
+                    scope_record=args.scope_record,
                 )
         except ValueError as exc:
             print(json.dumps({"error": "invalid_workflow", "message": str(exc)}))

@@ -18,10 +18,10 @@ Safety contract (mirrors :mod:`redops_rag.workflow`):
 """
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
+from pathlib import Path
 
-from .orchestrator import ROUTES
+from .orchestrator import rank_routes
 from .workflow import plan_engagement
 
 OS_HINTS: tuple[str, ...] = ("unknown", "windows", "linux")
@@ -76,7 +76,6 @@ LABS: tuple[LabEnvironment, ...] = (
 )
 
 _LAB_BY_ID = {env.id: env for env in LABS}
-_WORD = re.compile(r"[a-z0-9][a-z0-9+.#_-]*")
 
 
 def lab_ids() -> tuple[str, ...]:
@@ -109,7 +108,9 @@ def _validate_task(task: str) -> str:
     return task.strip()
 
 
-def _normalize_os_hint(os_hint: str) -> str:
+def normalize_os_hint(os_hint: str) -> str:
+    """Validate and normalize an OS hint; public so callers share one canonical form."""
+
     if not isinstance(os_hint, str):
         raise TypeError("os_hint must be a string")
     normalized = os_hint.strip().lower()
@@ -121,25 +122,18 @@ def _normalize_os_hint(os_hint: str) -> str:
 
 
 def _recommended_agents(task: str, os_hint: str, routing_tags: tuple[str, ...]) -> list[dict[str, object]]:
-    """Explainable specialist hints for a lab target; routing only, never execution."""
+    """Explainable specialist hints for a lab target; routing only, never execution.
+
+    Ranking is delegated to :func:`redops_rag.orchestrator.rank_routes` so lab
+    hints and orchestrator routing cannot drift apart. The OS hint double-weights
+    its matching specialist (mirroring ``route_task``), which keeps an OS-specific
+    specialist above lexical ties such as a single ``htb`` keyword match.
+    """
 
     effective = " ".join((task, " ".join(routing_tags), os_hint if os_hint != "unknown" else ""))
-    lowered = effective.lower()
-    terms = set(_WORD.findall(lowered))
-    ranked: list[dict[str, object]] = []
-    for agent, keywords, knowledge, mcp in ROUTES:
-        matches = [keyword for keyword in keywords if keyword in lowered or keyword in terms]
-        if matches:
-            ranked.append(
-                {
-                    "agent": agent,
-                    "matched": matches[:5],
-                    "knowledge": list(knowledge),
-                    "allowed_mcp": list(mcp),
-                }
-            )
-    ranked.sort(key=lambda item: (-len(item["matched"]), str(item["agent"])))
-    return ranked[:3]
+    boost = (os_hint,) if os_hint != "unknown" else ()
+    keep = {"agent", "matched", "knowledge", "allowed_mcp"}
+    return [{key: value for key, value in item.items() if key in keep} for item in rank_routes(effective, 3, boost)]
 
 
 def lab_engagement(
@@ -149,6 +143,7 @@ def lab_engagement(
     os_hint: str = "unknown",
     scope_confirmed: bool = False,
     include_active: bool = False,
+    scope_record: str | Path | None = None,
 ) -> dict[str, object]:
     """Return a phase-gated plan enriched with read-only lab target context.
 
@@ -163,12 +158,13 @@ def lab_engagement(
         raise ValueError(f"unknown lab: {lab}")
     if not isinstance(scope_confirmed, bool) or not isinstance(include_active, bool):
         raise TypeError("scope_confirmed and include_active must be booleans")
-    normalized_os = _normalize_os_hint(os_hint)
+    normalized_os = normalize_os_hint(os_hint)
 
     plan = plan_engagement(
         normalized,
         scope_confirmed=scope_confirmed,
         include_active=include_active,
+        scope_record=scope_record,
     )
     result = dict(plan)
     result["lab"] = {

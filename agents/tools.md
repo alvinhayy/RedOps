@@ -21,15 +21,15 @@ means the workflow may continue with a documented limitation.
 <!-- BEGIN GENERATED AGENT TOOL MATRIX -->
 | Agent | Required tools (registry + owned skills) | Optional tools (registry + owned skills) |
 |---|---|---|
-| `orchestrator_agent` | `redops` | — |
-| `scope_agent` | `redops` | `jq`, `markdown-tools`, `nmap`, `pandoc`, `python` |
-| `recon_agent` | `nmap`, `redops` | `httpx`, `jq`, `ldapsearch`, `markdown-tools`, `netexec`, `pandoc`, `python`, `tshark` |
-| `assessment_agent` | `redops` | `jq`, `markdown-tools`, `nmap`, `nuclei`, `pandoc`, `python`, `semgrep`, `trivy` |
-| `exploitation_agent` | `redops` | `jq`, `markdown-tools`, `metasploit`, `nmap`, `nuclei`, `pandoc`, `python` |
-| `post_exploitation_agent` | `redops` | `bloodhound-python`, `jq`, `linpeas`, `markdown-tools`, `netexec`, `nmap`, `pandoc`, `python`, `seatbelt` |
-| `lateral_movement_agent` | `nmap`, `redops` | `bloodhound-python`, `impacket`, `jq`, `kerbrute`, `markdown-tools`, `netexec`, `pandoc`, `python` |
-| `poc_agent` | `redops` | `curl`, `jq`, `markdown-tools`, `nmap`, `pandoc`, `python` |
-| `reporting_agent` | `markdown-tools`, `redops` | `jq`, `nmap`, `pandoc`, `python` |
+| `orchestrator_agent` | `herdr`, `opencode` | `redops-rag` |
+| `scope_agent` | — | `jq`, `markdown-tools`, `nmap`, `pandoc`, `python`, `redops` |
+| `recon_agent` | `nmap` | `httpx`, `jq`, `ldapsearch`, `markdown-tools`, `netexec`, `pandoc`, `python`, `redops`, `tshark` |
+| `assessment_agent` | — | `jq`, `markdown-tools`, `nmap`, `nuclei`, `pandoc`, `python`, `redops`, `semgrep`, `trivy` |
+| `exploitation_agent` | — | `jq`, `markdown-tools`, `metasploit`, `nmap`, `nuclei`, `pandoc`, `python`, `redops` |
+| `post_exploitation_agent` | — | `bloodhound-python`, `jq`, `linpeas`, `markdown-tools`, `netexec`, `nmap`, `pandoc`, `python`, `redops`, `seatbelt` |
+| `lateral_movement_agent` | `nmap` | `bloodhound-python`, `impacket`, `jq`, `kerbrute`, `markdown-tools`, `netexec`, `pandoc`, `python`, `redops` |
+| `poc_agent` | — | `curl`, `jq`, `markdown-tools`, `nmap`, `pandoc`, `python`, `redops` |
+| `reporting_agent` | `markdown-tools` | `jq`, `nmap`, `pandoc`, `python`, `redops` |
 | `ad_agent` | `bloodhound-python`, `impacket`, `ldapsearch`, `netexec`, `nmap` | `bloodyad`, `certipy`, `kerbrute` |
 | `windows_redteam_agent` | `lolbas`, `powerview`, `seatbelt`, `winpeas` | `mimikatz` |
 | `web_agent` | `burp`, `httpx`, `nmap` | `camoufox`, `ffuf`, `nuclei`, `xsrfprobe` |
@@ -39,18 +39,18 @@ means the workflow may continue with a documented limitation.
 | `network_agent` | `netexec`, `nmap`, `tshark` | `masscan`, `responder`, `wireshark` |
 | `container_devops_agent` | `docker`, `kubectl`, `trivy` | `grype`, `helm`, `kube-bench`, `syft` |
 | `web3_agent` | `cast`, `mythril`, `slither` | `burp`, `echidna`, `foundry`, `semgrep` |
-| `rag_curator_agent` | `markdown-tools`, `python`, `redops` | `jq`, `pandoc`, `ripgrep` |
+| `rag_curator_agent` | `markdown-tools`, `python` | `jq`, `pandoc`, `ripgrep` |
 <!-- END GENERATED AGENT TOOL MATRIX -->
 
 ## Profiles
 
 ### `orchestrator_agent`
 
-- Required: RedOps CLI and `redops-rag` MCP.
+- Required: OpenCode and Herdr; optional: `redops-rag` MCP.
 - Role: classify the task, retrieve cited context, gate authorization, and delegate to
   the narrowest specialist. It does not execute target commands.
-- Fallback: return a bounded routing plan from local retrieval when the specialist or
-  provider is unavailable.
+- Fallback: return a bounded routing plan from local references when the specialist or
+  provider is unavailable; the RedOps CLI is optional.
 
 ### `ad_agent`
 
@@ -119,10 +119,10 @@ means the workflow may continue with a documented limitation.
 
 ### `rag_curator_agent`
 
-- Required: RedOps CLI, Python, Markdown tools.
+- Required: Python, Markdown tools; optional: RedOps CLI for index maintenance.
 - Optional: ripgrep, jq, Pandoc.
-- Source/checks: local bounded terminal (`redops stats`; `python --version`; `command -v rg jq pandoc`). No target MCP.
-- Fallback: standard-library Markdown/front-matter processing and `redops ingest`.
+- Source/checks: local bounded terminal (`python --version`; `command -v rg jq pandoc`). No target MCP.
+- Fallback: standard-library Markdown/front-matter processing; index refresh remains optional CLI maintenance.
 - Never execute code extracted from scraped pages; preserve provenance, licenses, hashes, and audit decisions.
 
 ## MCP boundary summary

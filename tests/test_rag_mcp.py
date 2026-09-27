@@ -57,3 +57,18 @@ def test_rag_mcp_plans_phase_gates():
     phases = {phase["id"]: phase for phase in payload["phases"]}
     assert phases["pre_engagement"]["status"] == "required"
     assert phases["exploitation"]["status"] == "blocked_until_scope_and_approval"
+
+
+def test_rag_mcp_scope_record_is_optional_evidence(tmp_path):
+    record = tmp_path / "scope.md"
+    record.write_text(
+        "## Authorization\napproved\n## Target inventory\n10.0.0.1 In scope YES\n"
+        "## Phase approvals\nrecon\n",
+        encoding="utf-8",
+    )
+    result = RagMcpServer(FakeService()).call_tool(
+        "plan_engagement", {"task": "assess a Windows host", "scope_record": str(record)}
+    )
+    payload = json.loads(result["content"][0]["text"])
+    assert payload["scope_record"]["valid_structure"] is True
+    assert payload["active_execution_enabled"] is False

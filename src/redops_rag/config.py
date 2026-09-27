@@ -31,6 +31,8 @@ def _env_bool(name: str, default: bool) -> bool:
 class Settings:
     db_path: Path = Path("data/redops.db")
     knowledge_dir: Path = Path("knowledge")
+    # Keep excluded source niches on disk without indexing them by default.
+    knowledge_exclude: tuple[str, ...] = ("api",)
     writeups_dir: Path = Path("writeups")
     embedding_provider: str = "hash"
     embedding_model: str = "redops-hash-v1"
@@ -75,6 +77,11 @@ class Settings:
         return cls(
             db_path=Path(os.getenv("REDOPS_DB_PATH", "data/redops.db")),
             knowledge_dir=Path(os.getenv("REDOPS_KNOWLEDGE_DIR", "knowledge")),
+            knowledge_exclude=tuple(
+                item.strip().strip("/")
+                for item in os.getenv("REDOPS_KNOWLEDGE_EXCLUDE", "api").split(",")
+                if item.strip().strip("/")
+            ),
             writeups_dir=Path(os.getenv("REDOPS_WRITEUPS_DIR", "writeups")),
             embedding_provider=os.getenv("REDOPS_EMBEDDING_PROVIDER", "hash"),
             embedding_model=os.getenv("REDOPS_EMBEDDING_MODEL", "redops-hash-v1"),

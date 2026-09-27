@@ -56,6 +56,15 @@ class Ingestor:
         self.store = store
         self.embedder = embedder
 
+    def _is_excluded(self, path: Path, root: Path, corpus: str) -> bool:
+        """Exclude configured knowledge niches without deleting source files."""
+
+        if corpus != "knowledge":
+            return False
+        relative_parts = path.relative_to(root).parts[:-1]
+        excluded = {item.lower().strip("/") for item in self.settings.knowledge_exclude}
+        return any(part.lower() in excluded for part in relative_parts)
+
     def run(self, source_dir: Path | None = None, force: bool = False) -> dict[str, int]:
         roots: list[tuple[str, Path]] = [("knowledge", (source_dir or self.settings.knowledge_dir).resolve())]
         if source_dir is None and self.settings.writeups_dir.resolve().is_dir():
@@ -74,7 +83,11 @@ class Ingestor:
         indexed = skipped = empty = 0
         discovered = 0
         for corpus, root in roots:
-            files = sorted(path for path in root.rglob("*.md") if path.is_file())
+            files = sorted(
+                path
+                for path in root.rglob("*.md")
+                if path.is_file() and not self._is_excluded(path, root, corpus)
+            )
             discovered += len(files)
             for path in files:
                 document = load_document(path, root, corpus)
