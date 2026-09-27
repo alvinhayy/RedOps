@@ -1,3 +1,5 @@
+![RedOps / Red Team Operators](assets/banner.svg)
+
 # RedOps / Red Team Operators
 
 RedOps is a Makima-style OpenCode workspace for authorized penetration testing. Exegol supplies tools, Herdr keeps sessions, and the RedOps agent delegates to specialists. Knowledge is Markdown organized by niche, with original source URLs retained.
@@ -30,7 +32,7 @@ engagements/<name>/          private notes and artifacts
 scripts/                     tool/MCP setup only
 ```
 
-`knowledgebase/niches/api/` is optional user-provided book material. It is not committed; verify redistribution rights before publishing it. A local legacy `data/redops.db`, if present, is only an archive and is not used here.
+`knowledgebase/niches/api/` is optional user-provided book material. It is not committed; verify redistribution rights before publishing it.
 
 ## Setup
 
