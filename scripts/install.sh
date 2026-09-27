@@ -70,4 +70,7 @@ else
   warn 'Exegol MCP not configured; install exegol-mcp and rerun this script'
 fi
 
+log 'Validating agent resource and MCP wiring'
+python3 "$project_root/scripts/check_tools.py" --wiring
+
 log "Ready: open $project_root in Herdr/OpenCode; use /status then /solve"

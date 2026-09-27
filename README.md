@@ -22,12 +22,12 @@ AGENTS.md                    engagement and orchestration rules
 .opencode/agent/             RedOps + 9 specialists
 .opencode/command/           /solve and /status
 .opencode/skill/             knowledge, toolbox, Herdr, scope, reporting
-.opencode/tools.json         tools and MCP requirements by agent
+.opencode/tools.json         knowledge, binary, engagement, tool and MCP wiring by agent
 knowledgebase/INDEX.md       niche-to-file map
 knowledgebase/niches/        canonical Markdown corpus
 knowledgebase/{PayloadsAllTheThings,InternalAllTheThings,HackerRecipes}/
                              source-oriented reference maps
-precompiled-binaries/        operator-provided binaries, not committed
+precompiled-binaries/        empty SHA-256 manifest; operator-provided binaries only
 engagements/<name>/          private notes and artifacts
 scripts/                     tool/MCP setup only
 ```
@@ -43,6 +43,16 @@ curl -fsSL https://raw.githubusercontent.com/alvinhayy/RedOps/master/scripts/ins
 ```
 
 The installer checks `.opencode/tools.json`, offers optional `exegol-mcp` installation via `pipx`, and writes only project-local, non-secret MCP configuration. It does **not** create a `redops` CLI, Python RAG service, or provider credentials, and it leaves global OpenCode provider/OAuth configuration untouched. Missing specialist tools can be supplied by Exegol or installed manually; exploit tooling is not silently installed.
+
+Each of the 9 specialist agents has a mapped set of knowledge niches, a private
+engagement ledger path, a binary policy and permitted MCP servers in
+[`.opencode/tools.json`](.opencode/tools.json). Verify the wiring with
+`python3 scripts/check_tools.py --wiring`; check actual MCP connectivity with
+`opencode mcp list`. Exegol MCP requires a running Docker daemon, while Burp MCP
+requires its locally configured listener. The manifest in
+[`precompiled-binaries/`](precompiled-binaries/) currently lists **no binaries**.
+Mobile, reversing and Web3 material is available for source research, but this
+workspace does not claim to have dedicated execution agents for those niches.
 
 Open the workspace with Herdr/OpenCode. Use `/solve` for an authorized target and `/status` to inspect readiness. RedOps reads the index, creates an engagement ledger, and delegates to specialists. See [AGENTS.md](AGENTS.md) for safety and evidence rules.
 

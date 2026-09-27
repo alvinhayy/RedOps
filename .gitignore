@@ -21,5 +21,8 @@ docs/lab-observations/
 engagements/*
 !engagements/README.md
 !engagements/ENGAGEMENT-TEMPLATE.md
+precompiled-binaries/*
+!precompiled-binaries/README.md
+!precompiled-binaries/MANIFEST.json
 dist/
 *.egg-info/

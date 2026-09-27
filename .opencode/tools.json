@@ -1,21 +1,56 @@
 {
-  "version": 1,
-  "agents": {
-    "redops": {"required": ["opencode", "herdr", "exegol"], "optional": ["exegol-mcp"]},
-    "recon": {"required": ["nmap"], "optional": ["rustscan", "tshark"]},
-    "web-recon": {"required": ["curl"], "optional": ["httpx", "ffuf", "burp", "camoufox"]},
-    "web-exploit": {"required": ["curl"], "optional": ["burp", "sqlmap", "nuclei"]},
-    "cve-research": {"required": [], "optional": ["searchsploit", "nuclei"]},
-    "ad-enum": {"required": ["ldapsearch"], "optional": ["netexec", "bloodhound-python", "certipy"]},
-    "ad-exploit": {"required": ["impacket"], "optional": ["netexec", "certipy", "bloodyad"]},
-    "linux-privesc": {"required": [], "optional": ["linpeas", "pspy"]},
-    "windows-privesc": {"required": [], "optional": ["seatbelt", "winpeas", "powerview"]},
-    "persistence": {"required": [], "optional": []}
+  "version": 2,
+  "resources": {
+    "index": "knowledgebase/INDEX.md",
+    "knowledgebase": "knowledgebase/niches",
+    "binary_manifest": "precompiled-binaries/MANIFEST.json",
+    "engagement_template": "engagements/ENGAGEMENT-TEMPLATE.md",
+    "engagement_ledger": "engagements/<name>/notes.md"
   },
-  "mcp": {
-    "default": ["exegol-mcp"],
-    "web": ["burp", "camoufox"],
-    "ad": ["bloodhound-python"],
-    "mobile": ["uiautomator2", "ghidra", "radare2"]
+  "agents": {
+    "redops": {
+      "knowledge": ["knowledgebase/INDEX.md"], "binaries": false, "mcp": [],
+      "required": ["opencode", "herdr", "exegol"], "optional": ["exegol-mcp"]
+    },
+    "recon": {
+      "knowledge": ["network", "wireless", "cloud", "container", "devops", "methodology"],
+      "binaries": true, "mcp": ["exegol"],
+      "required": ["nmap"], "optional": ["rustscan", "tshark"]
+    },
+    "web-recon": {
+      "knowledge": ["web", "network", "database"], "optional_knowledge": ["api"],
+      "binaries": true, "mcp": ["exegol", "burp", "camoufox"],
+      "required": ["curl"], "optional": ["httpx", "ffuf", "burp", "camoufox"]
+    },
+    "web-exploit": {
+      "knowledge": ["web", "vulnerabilities", "database"], "optional_knowledge": ["api"],
+      "binaries": true, "mcp": ["exegol", "burp"],
+      "required": ["curl"], "optional": ["burp", "sqlmap", "nuclei"]
+    },
+    "cve-research": {
+      "knowledge": ["vulnerabilities", "malware", "reversing", "tools", "misc", "mobile", "web3"],
+      "binaries": false, "mcp": [],
+      "required": [], "optional": ["searchsploit", "nuclei"]
+    },
+    "ad-enum": {
+      "knowledge": ["ad", "windows", "network"], "binaries": true, "mcp": ["exegol"],
+      "required": ["ldapsearch"], "optional": ["netexec", "bloodhound-python", "certipy"]
+    },
+    "ad-exploit": {
+      "knowledge": ["ad", "windows", "redteam"], "binaries": true, "mcp": ["exegol"],
+      "required": ["impacket"], "optional": ["netexec", "certipy", "bloodyad"]
+    },
+    "linux-privesc": {
+      "knowledge": ["linux", "container", "devops", "misc"], "binaries": true,
+      "mcp": ["exegol"], "required": [], "optional": ["linpeas", "pspy"]
+    },
+    "windows-privesc": {
+      "knowledge": ["windows", "ad", "redteam", "misc"], "binaries": true,
+      "mcp": ["exegol"], "required": [], "optional": ["seatbelt", "winpeas", "powerview"]
+    },
+    "persistence": {
+      "knowledge": ["redteam", "windows", "linux", "cloud", "methodology"],
+      "binaries": true, "mcp": ["exegol"], "required": [], "optional": []
+    }
   }
 }

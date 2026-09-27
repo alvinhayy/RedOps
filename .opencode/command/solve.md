@@ -8,7 +8,10 @@ Act as the RedOps orchestrator for `$ARGUMENTS`.
    session/agent workflow instead of a RedOps CLI command.
 2. Confirm written authorization, exact targets, exclusions, rate limits, and phase approvals.
 3. Create/read `engagements/<name>/notes.md` as the single durable handoff ledger.
-4. Spawn the narrowest specialist agents in uniquely named `ai-<role>` Herdr tabs.
+4. Read each selected role in `.opencode/tools.json`. Pass its knowledge niches,
+   allowed MCPs, `precompiled-binaries/MANIFEST.json` policy and the exact
+   engagement ledger path when spawning the narrowest specialist in a uniquely
+   named `ai-<role>` Herdr tab.
 5. Read worker results from the ledger, then route the next phase using only observed evidence.
 6. Keep exploitation, post-exploitation, lateral movement, and persistence blocked until
    their exact approvals and Exegol health are confirmed.
