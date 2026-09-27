@@ -51,8 +51,7 @@ See [herdr.dev](https://herdr.dev/) for installation and session management.
 ├── engagements/               # private per-target ledgers and sanitized templates
 ├── herdr/                     # workspace/session conventions (runtime state stays private)
 ├── knowledge/                 # canonical niche-organized RAG corpus
-│   └── api/                   # book-derived corpus; excluded from Git and indexing
-├── knowledgebase/             # corpus contract and generated index documentation
+│   └── api/                   # optional user-added corpus; excluded by default
 ├── precompiled-binaries/      # manifest only; binaries are supplied by Exegol
 ├── skills/                    # reusable RedOps skills and slash-command sources
 └── src/redops_rag/            # CLI, RAG, workflow, router and MCP adapters
@@ -92,4 +91,5 @@ OpenCode/Herdr engagement.
 The layered runtime model is adapted from the private Makima repository's architecture
 (Exegol → Herdr → OpenCode → orchestrator → specialist agents). RedOps intentionally
 adds explicit provenance, non-destructive defaults, separate knowledge/writeup corpora,
-and an API-book exclusion so a large imported book cannot silently dominate retrieval.
+and treats `knowledge/api/` as an optional user-added corpus that is excluded by default
+so a large imported book cannot silently dominate retrieval.

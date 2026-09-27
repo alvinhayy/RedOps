@@ -23,8 +23,8 @@ present.
 - Keep loot, credentials, tokens, cookies, hashes, raw identity exports, and VPN data
   outside the repository and outside `knowledge/`.
 - `knowledge/` is the source-grounded technique corpus; `writeups/` is the case corpus.
-- `knowledge/api/` contains book-derived API material and is intentionally excluded from
-  the RedOps index and Git. Do not re-enable it without an explicit operator decision.
+- `knowledge/api/` is optional user-added API material and is intentionally excluded from
+  the RedOps index and Git by default. Enable it only with an explicit operator decision.
 
 ## Agent lifecycle
 
