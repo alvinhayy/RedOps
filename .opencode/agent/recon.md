@@ -25,6 +25,19 @@ unlisted or unhashed binary is unavailable. Record scoped evidence and handoff
 in `engagements/<name>/notes.md`. Use only MCP servers assigned to this role;
 report missing or disconnected servers rather than assuming readiness.
 
+## Knowledge route
+
+- Start with `knowledgebase/niches/methodology/external-recon-methodology.md`
+  and `pentesting-methodology.md` to build a scoped inventory plan.
+- Use `network/` only for services actually observed; choose the matching protocol
+  page (for example `pentesting-ftp.md`), not every port guide. Use `wireless/`
+  only when radio assessment is explicitly in scope.
+- Consult `cloud/`, `container/`, or `devops/` only when the asset inventory shows
+  that environment. Separate cloud tenant evidence from on-prem hosts.
+- Hand off a deduplicated asset/service table, observed versions and timestamps,
+  source citations, scan limits, and questions for the next specialist. A guide's
+  possible vulnerability is a hypothesis until target evidence confirms it.
+
 Perform rate-limited information gathering only for the explicit allowlist. Build an
 asset/service inventory, retain timestamps and raw command output, and hand off open
 questions. Discovery does not authorize exploitation, credential attacks or pivoting.

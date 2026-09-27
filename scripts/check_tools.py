@@ -73,6 +73,10 @@ def check_wiring(manifest: dict) -> dict:
     mcp_names = set((resolved or config).get("mcp", {}))
     report = {}
     for role, profile in profiles.items():
+        guidance = (ROOT / ".opencode/agent" / f"{role}.md").read_text()
+        heading = "## Knowledge-based dispatch" if role == "redops" else "## Knowledge route"
+        if heading not in guidance or ".opencode/tools.json" not in guidance:
+            raise SystemExit(f"Missing role-specific knowledge guidance: {role}")
         for niche in profile["knowledge"]:
             source = ROOT / niche if niche.startswith("knowledgebase/") else ROOT / resources["knowledgebase"] / niche
             if not source.exists():

@@ -51,6 +51,9 @@ engagement ledger path, a binary policy and permitted MCP servers in
 `opencode mcp list`. Exegol MCP requires a running Docker daemon, while Burp MCP
 requires its locally configured listener. The manifest in
 [`precompiled-binaries/`](precompiled-binaries/) currently lists **no binaries**.
+Each prompt under [`.opencode/agent/`](.opencode/agent/) now gives role-specific
+knowledge routes, source-selection criteria and evidence handoff requirements;
+the consolidated route map is in [knowledgebase/INDEX.md](knowledgebase/INDEX.md).
 Mobile, reversing and Web3 material is available for source research, but this
 workspace does not claim to have dedicated execution agents for those niches.
 

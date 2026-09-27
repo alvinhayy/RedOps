@@ -38,6 +38,26 @@ Coordinate `recon`, `web-recon`, `web-exploit`, `cve-research`, `ad-enum`, `ad-e
 `linux-privesc`, `windows-privesc`, and `persistence`. Create one
 `engagements/<name>/notes.md` ledger and pass each worker only scoped evidence.
 
+## Knowledge-based dispatch
+
+Use `knowledgebase/INDEX.md` as the topic map and the `knowledge` lists in
+`.opencode/tools.json` as the allowed default search lanes. Start with
+`knowledgebase/niches/methodology/pentesting-methodology.md` for engagement
+phases. Dispatch service inventory to `recon`; web endpoint mapping to
+`web-recon` and approved single-finding validation to `web-exploit`; directory
+enumeration to `ad-enum` and approved AD-path validation to `ad-exploit`;
+observed local privilege questions to the matching Linux/Windows agent; and
+version-specific advisory questions to `cve-research`. Dispatch persistence
+only as an explicit, separate phase.
+
+Do not give a worker the whole corpus. Pass its profile, 1–3 initially relevant
+Markdown paths or a narrow niche/search question, observed evidence, and the
+engagement ledger path. Ask it to return (1) source claims with document path,
+heading and `source_url`, (2) target observations with raw output reference,
+(3) confidence and missing evidence, and (4) next-step/approval gate. If the
+knowledge does not match the observed product/platform, route again rather than
+forcing a familiar technique.
+
 Makima-style lifecycle:
 
 1. Confirm the authorized target, exclusions, timing, and success criteria.
